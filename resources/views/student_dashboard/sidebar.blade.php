@@ -96,6 +96,14 @@
                 <div data-i18n="Assignments"> Assignments</div>
             </a>
         </li>
+		<li class="menu-item <?php if ((Request::url() === route('student_assessment')) ) {
+                                            echo 'active';
+                                        } ?>">
+            <a href="{{ route('student_assessment') }}" class="menu-link">
+                <i class="menu-icon icon_resize tf-icons ti ti-text-caption"></i>
+                <div data-i18n="Assessment"> Assessment</div>
+            </a>
+        </li>
         <li class="menu-item">
             <a href="" class="menu-link">
                 <i class="menu-icon icon_resize tf-icons ti ti-certificate"></i>
