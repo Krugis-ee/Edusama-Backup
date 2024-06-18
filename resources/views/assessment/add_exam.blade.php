@@ -469,7 +469,7 @@ bottom:   0;
 				</form>
               </div>
 			  <?php
-				//$exam_id=1;			  
+				//$exam_id=43;			  
 			  $exam_id = \Session::get('exam_id');
 			  if(isset($exam_id))
 			  { ?>
@@ -513,25 +513,25 @@ bottom:   0;
                       <label class="form-label">Choices<span class="text-danger">*</span></label>
                       <div class="input-group form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" id="radio1_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_a==$questions[$i]->answer) { echo 'checked'; }  ?> value="option1">
+                          <input class="form-check-input" type="radio" id="radio1_mcq1_<?php echo $i; ?>" name="mcq1_inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_a==$questions[$i]->answer) { echo 'checked'; }  ?> value="option1">
                         </div>
                         <input type="text" class="form-control answer_8" readonly id="choice1_mcq1_<?php echo $i; ?>" placeholder="Choice (A)" value="{{ $questions[$i]->option_a }}" aria-label="Text input with checkbox">
                       </div>
                       <div class="input-group  form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" id="radio2_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_b==$questions[$i]->answer) { echo 'checked'; }  ?> value="option2">
+                          <input class="form-check-input" type="radio" id="radio2_mcq1_<?php echo $i; ?>" name="mcq1_inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_b==$questions[$i]->answer) { echo 'checked'; }  ?> value="option2">
                         </div>
                         <input type="text" class="form-control answer_8" readonly id="choice2_mcq1_<?php echo $i; ?>" placeholder="Choice (B)" value="{{ $questions[$i]->option_b }}" aria-label="Text input with checkbox">
                       </div>
                       <div class="input-group  form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" id="radio3_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_c==$questions[$i]->answer) { echo 'checked'; }  ?> value="option3">
+                          <input class="form-check-input" type="radio" id="radio3_mcq1_<?php echo $i; ?>" name="mcq1_inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_c==$questions[$i]->answer) { echo 'checked'; }  ?> value="option3">
                         </div>
                         <input type="text" class="form-control answer_8" readonly id="choice3_mcq1_<?php echo $i; ?>" placeholder="Choice (C)" value="{{ $questions[$i]->option_c }}" aria-label="Text input with checkbox">
                       </div>
                       <div class="input-group  form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" id="radio4_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_d==$questions[$i]->answer) { echo 'checked'; }  ?> value="option4">
+                          <input class="form-check-input" type="radio" id="radio4_mcq1_<?php echo $i; ?>" name="mcq1_inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_d==$questions[$i]->answer) { echo 'checked'; }  ?> value="option4">
                         </div>
                         <input type="text" class="form-control answer_8" readonly id="choice4_mcq1_<?php echo $i; ?>" placeholder="Choice (D)" value="{{ $questions[$i]->option_d }}" aria-label="Text input with checkbox">
                       </div>
