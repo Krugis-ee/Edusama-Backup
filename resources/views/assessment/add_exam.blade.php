@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
   <title>Admin Assessments</title>
   <meta name="description" content="" />
+   <!-- provide the csrf token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
   @include('dashboard.header')
   <?php
     $user_id = session()->get('loginId');
@@ -259,7 +261,11 @@
     .previous_button:not([class*=btn-label-]):not([class*=btn-outline-]) {
       box-shadow: 0 0.125rem 0.25rem rgba(165, 163, 174, 0.3);
     }
-
+	.previous_button {
+		position: absolute;
+right:    0;
+bottom:   0;
+	}
     .btn_design,
     .question_paper_cta,
     .previous_button {
@@ -365,29 +371,43 @@
               <!-- Question Paper Creation -->
               <div class="card mb-4" id="questionpaper_creation">
                 <h5 id="pagetitle" class="p-3 mb-0">Create a Exam</h5>
+				 
 				<form id="myform" action="{{ route('post_exam_one') }}" method="POST" >
-				@csrf
+				
                 <div class="card-body">
+				@if(session()->has('success'))
+                                <div class="alert alert-success">
+                                    {{ session()->get('success') }}
+                                </div>
+                                @endif
                   <div class="row">
-                    <div class="col-4 mb-3">
-                      <label for="selectpickerBasic" class="form-label">Classroom</label>
-                      <select id="paper_class_room" name="class_room_id" class="selectpicker w-100" data-style="btn-default">
-                        <option value="">Select Classroom</option>
+				  @csrf
+				  <div class="col-3 mb-3">
+                      <label for="selectpickerBasic" class="form-label">Branch</label>
+                      <select id="branch_id" name="branch_id" required class="selectpicker w-100" data-style="btn-default">
+                        <option value="">Select Branch</option>
                       <?php					  
-					  foreach($class_rooms as $class_room)
+					  foreach($branches as $branch)
 					  {					  
 					  ?>
-						<option value="{{ $class_room->id }}">{{ $class_room->class_room_name }}</option>  
+						<option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>  
 					  <?php } ?>
                       </select>
                     </div>
-                    <div class="col-4 mb-3" id="paper_subject_div">
+                    <div class="col-3 mb-3">
+                      <label for="selectpickerBasic" class="form-label">Classroom</label>
+                      <select id="paper_class_room" name="class_room_id" required class="form-control" data-style="btn-default">
+                        <option value="">Select Classroom</option>
+                      
+                      </select>
+                    </div>
+                    <div class="col-3 mb-3" id="paper_subject_div">
                       <label for="selectpickerBasic" class="form-label">Subject</label>
-                      <select id="paper_sub_ject" name="subject_id" class="form-control">
+                      <select id="paper_sub_ject" required name="subject_id" class="form-control">
                         <option value="">Select Subject</option>
                       </select>
                     </div>
-                    <div class="col-4 mb-3" id="paper_lesson_div">
+                    <div class="col-3 mb-3" id="paper_lesson_div">
                       <label for="selectpickerBasic" class="form-label">Lesson</label>
                       <br>
                       <button class="btn btn-success dropdown-toggle w-100" type="button" id="multiSelectDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="text-align: left; float: left; display: block !important; background: transparent !important; border: 1px solid #dbdade !important; color: #777485 !important; box-shadow: none !important; border-radius: 0.375rem !important;">
@@ -403,12 +423,12 @@
                           <div class="d-flex">
                             <div class="row">
                               <div class="col-3">
-                                <select id="" class="lessonsDD form-select form-select-sm">
+                                <select id="" name="individual_lesson_id[]" required class="lessonsDD form-select form-select-sm">
                                   <option value="">Select Lesson</option>                                  
                                 </select>
                               </div>
                               <div class="col-3">
-                                <select id="smallSelect" name="question_type[]" class="form-select form-select-sm">
+                                <select id="smallSelect" name="question_type[]" required class="form-select form-select-sm">
                                   <option value="">Questions Type</option>
                                   <option value="mcq_1">Multiple Choice Single Answer</option>
                                   <option value="mcq_2">Multiple Choice Multiple Answers</option>
@@ -420,15 +440,15 @@
                                 </select>
                               </div>
                               <div class="col-3">
-                                <select id="smallSelect" name="difficulty_level[]" class="form-select form-select-sm">
+                                <select id="smallSelect" name="difficulty_level[]" required class="form-select form-select-sm">
                                   <option value="">Difficulty Level</option>
-                                  <option value="easy">Easy</option>
-                                  <option value="medium">Medium</option>
-                                  <option value="hard">Hard</option>
+                                  <option value="Easy">Easy</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="Hard">Hard</option>
                                 </select>
                               </div>
                               <div class="col-2">
-                                <input type="text" name="question_count[]" class="form-control form-control-sm" id="defaultFormControlInput" placeholder="No.Of Questions" aria-describedby="defaultFormControlHelp">
+                                <input type="text" name="question_count[]" required class="form-control form-control-sm" id="defaultFormControlInput" placeholder="No.Of Questions" aria-describedby="defaultFormControlHelp">
                               </div>
                               <div class="col-1">
                                 <span class="badge badge-center rounded-pill bg-label-danger remove" style="position: relative;top: 4px;pointer-events: none;cursor: default;"><i class="ti ti-minus"></i></span>
@@ -437,57 +457,83 @@
                           </div>
                         </div>
                         <div class="block">
-                          <span class="badge rounded-pill bg-label-success add"><i class="ti ti-plus ti-sm" style="font-size: 11px !important;"></i>&nbsp;Add Option</span>
+                          <span style="cursor: pointer;" class="badge rounded-pill bg-label-success add"><i class="ti ti-plus ti-sm" style="font-size: 11px !important;"></i>&nbsp;Add Option</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="col-2" id="form_submit">
+                  <div class="col-2" id="form_submit_jp" style="display:none">
                     <button type="submit" class="btn btn-primary waves-effect waves-light" id="logo_color">Show</button>
                   </div>
                 </div>
 				</form>
               </div>
+			  <?php
+				//$exam_id=1;			  
+			  $exam_id = \Session::get('exam_id');
+			  if(isset($exam_id))
+			  { ?>
               <div class="card" id="question_paper">
                 <div class="card-body">
+				<input type="hidden" id="exam_id" value="{{ $exam_id }}">
+				<!--type - 1 - mcq 1-->
+				<?php 				
+				$question_type=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','mcq_1')->first(); 
+				if($question_type)
+				{
+					$lesson_id=$question_type->lesson_id;
+					$complexity=$question_type->difficulty_level;
+				?>
+				<input type="hidden" name="question_types[]" value="mcq_1">
                   <h5 id="pagetitle">Multiple Choice Single Answer</h5>
-                  <div class="row">
+                  <?php $no_of_questions=$question_type->no_of_questions;
+					$questions=App\Models\QuestionTypeOne::where('type',1)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions)->get(); 				  
+				  if(count($questions)>0)
+				  {
+				  for($i=0;$i<$no_of_questions;$i++)
+				  {
+					  if(isset($questions[$i]))
+					  {
+					  $j=$i+1;
+				  ?>
+				  <div class="row">
                     <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
                       <br>
                       <br>
                       <br>
                       <br>
-                      <span class="badge badge-center bg-label-dark">1</span>
+                      <span class="badge badge-center bg-label-dark"><?php echo $j; ?></span>
                     </div>
                     <div class="mb-3 col-lg-7 col-xl-5 col-12 mb-0">
                       <label class="form-label">Question<span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="question_8" rows="7"></textarea>
+					  <input type="hidden" name="question_id_mcq1[]" id="question_id_mcq1_<?php echo $i; ?>" value="{{ $questions[$i]->id }}">
+                      <textarea class="form-control" id="question_mcq1_<?php echo $i; ?>" rows="7" readonly>{{ $questions[$i]->question_name }}</textarea>
                     </div>
                     <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
                       <label class="form-label">Choices<span class="text-danger">*</span></label>
                       <div class="input-group form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option1">
+                          <input class="form-check-input" type="radio" id="radio1_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_a==$questions[$i]->answer) { echo 'checked'; }  ?> value="option1">
                         </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (A)" aria-label="Text input with checkbox">
+                        <input type="text" class="form-control answer_8" readonly id="choice1_mcq1_<?php echo $i; ?>" placeholder="Choice (A)" value="{{ $questions[$i]->option_a }}" aria-label="Text input with checkbox">
                       </div>
                       <div class="input-group  form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option2">
+                          <input class="form-check-input" type="radio" id="radio2_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_b==$questions[$i]->answer) { echo 'checked'; }  ?> value="option2">
                         </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (B)" aria-label="Text input with checkbox">
+                        <input type="text" class="form-control answer_8" readonly id="choice2_mcq1_<?php echo $i; ?>" placeholder="Choice (B)" value="{{ $questions[$i]->option_b }}" aria-label="Text input with checkbox">
                       </div>
                       <div class="input-group  form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option3">
+                          <input class="form-check-input" type="radio" id="radio3_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_c==$questions[$i]->answer) { echo 'checked'; }  ?> value="option3">
                         </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (C)" aria-label="Text input with checkbox">
+                        <input type="text" class="form-control answer_8" readonly id="choice3_mcq1_<?php echo $i; ?>" placeholder="Choice (C)" value="{{ $questions[$i]->option_c }}" aria-label="Text input with checkbox">
                       </div>
                       <div class="input-group  form-check-inline mb-1">
                         <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option4">
+                          <input class="form-check-input" type="radio" id="radio4_mcq1_<?php echo $i; ?>" name="inlineRadio_<?php echo $j?>" <?php if($questions[$i]->option_d==$questions[$i]->answer) { echo 'checked'; }  ?> value="option4">
                         </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (D)" aria-label="Text input with checkbox">
+                        <input type="text" class="form-control answer_8" readonly id="choice4_mcq1_<?php echo $i; ?>" placeholder="Choice (D)" value="{{ $questions[$i]->option_d }}" aria-label="Text input with checkbox">
                       </div>
                     </div>
                     <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
@@ -495,80 +541,480 @@
                       <br>
                       <br>
                       <br>
-                      <button type="button" class="btn btn-sm btn-label-linkedin waves-effect" id="refetch_btn">
+                      <button type="button" data-type="mcq_1" data-no="{{ $i}}"  data-lessonID="{{ $lesson_id }}" data-complexity="{{ $complexity }}" class="btn btn-sm btn-label-linkedin waves-effect refetch" id="refetch_btn">
                         <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
                       </button>
                     </div>
                     <hr />
                   </div>
-                  <h5 id="pagetitle">Short Answer</h5>
+					  <?php } } } } ?>
+				  <!--type - 1 - mcq 1-->
+				  <!--type - 2 - mcq 2-->
+				  <?php 				
+				$question_type2=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','mcq_2')->first(); 
+				if($question_type2)
+				{
+					$lesson_id=$question_type2->lesson_id;
+					$complexity=$question_type2->difficulty_level;
+				?>
+				<input type="hidden" name="question_types[]" value="mcq_2">
+				<h5 id="pagetitle">Multiple Choice Multiple Answer</h5>
+				
+				<?php $no_of_questions2=$question_type2->no_of_questions;
+					$questions2=App\Models\QuestionTypeTwo::where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions2)->get(); 				
+				  if(count($questions2)>0)
+				  {
+				  for($i=0;$i<$no_of_questions2;$i++)
+				  {
+					  if(isset($questions2[$i]))
+					  {
+					  $j=$i+1;
+					  $ans_str=$questions2[$i]->answer;
+					  $ans_arr=explode(',',$ans_str);
+				  ?>
+				  
+                  <div class="row">
+                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
+                      <br>
+                      <br>
+                      <br>
+                      <br> <span class="badge badge-center bg-label-dark">{{ $j }}</span> </div>
+                    <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
+                      <label class="form-label">Question<span class="text-danger">*</span></label>
+                      <input type="hidden" name="question_id_mcq2[]" id="question_id_mcq2_<?php echo $i; ?>" value="{{ $questions2[$i]->id }}">
+					  <textarea class="form-control" id="question_mcq2_<?php echo $i; ?>" rows="7" >{{ $questions2[$i]->question_name }}</textarea>
+                    </div>
+                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Choices<span class="text-danger">*</span></label>
+                      <div class="input-group mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input mt-0" id="check1_mcq2_<?php echo $i; ?>" type="checkbox" <?php if(in_array($questions2[$i]->option_a,$ans_arr)) { echo 'checked'; }  ?> aria-label="Checkbox for following text input" /> </div>
+                        <input type="text" class="form-control" id="choice1_mcq2_<?php echo $i; ?>" placeholder="Choice (A)" value="{{ $questions2[$i]->option_a }}" aria-label="Text input with checkbox" /> </div>
+                      <div class="input-group mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input mt-0" id="check2_mcq2_<?php echo $i; ?>" type="checkbox" <?php if(in_array($questions2[$i]->option_b,$ans_arr)) { echo 'checked'; }  ?> aria-label="Checkbox for following text input" /> </div>
+                        <input type="text" class="form-control" id="choice2_mcq2_<?php echo $i; ?>" placeholder="Choice (B)" value="{{ $questions2[$i]->option_b }}" aria-label="Text input with checkbox" /> </div>
+                      <div class="input-group mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input mt-0" id="check3_mcq2_<?php echo $i; ?>" type="checkbox" <?php if(in_array($questions2[$i]->option_c,$ans_arr)) { echo 'checked'; }  ?> aria-label="Checkbox for following text input" /> </div>
+                        <input type="text" class="form-control" id="choice3_mcq2_<?php echo $i; ?>" placeholder="Choice (C)" value="{{ $questions2[$i]->option_c }}" aria-label="Text input with checkbox" /> </div>
+                      <div class="input-group mb-3">
+                        <div class="input-group-text">
+                          <input class="form-check-input mt-0" id="check4_mcq2_<?php echo $i; ?>" type="checkbox" <?php if(in_array($questions2[$i]->option_d,$ans_arr)) { echo 'checked'; }  ?> aria-label="Checkbox for following text input" /> </div>
+                        <input type="text" class="form-control" id="choice4_mcq2_<?php echo $i; ?>" placeholder="Choice (D)" value="{{ $questions2[$i]->option_d }}" aria-label="Text input with checkbox" /> </div>
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <button type="button" data-type="mcq_2" data-no="{{ $i}}" data-lessonID="{{ $lesson_id }}" data-complexity="{{ $complexity }}" class="btn btn-sm btn-label-linkedin waves-effect refetch" id="refetch_btn">
+                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
+                      </button>
+                    </div>
+					
+                    <hr />
+                  </div>
+
+					  <?php } } } } ?>				 
+				 <!--type - 2 - mcq 2-->
+				 <!--type - 3 - match the following-->
+				<?php 				
+				$question_type3=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','match_following')->first(); 
+				if($question_type3)
+				{
+					$lesson_id=$question_type3->lesson_id;
+					$complexity=$question_type3->difficulty_level;
+				?>
+				<input type="hidden" name="question_types[]" value="match_following">
+				<h5 id="pagetitle">Match the Following</h5>
+				<?php $no_of_questions3=$question_type3->no_of_questions;
+					$questions3=App\Models\QuestionTypeThree::where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions3)->get(); 				
+				  if(count($questions3)>0)
+				  {
+				  for($i=0;$i<$no_of_questions3;$i++)
+				  {
+					 if(isset($questions3[$i]))
+					  {
+					  $j=$i+1;
+				  ?>
+				  <div class="row">
+				  <input type="hidden" name="question_id_match[]" id="question_id_match_<?php echo $i; ?>" value="{{ $questions3[$i]->id }}">
+                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
+                      <br>
+                      <br>
+                      <br>
+                      <br> <span class="badge badge-center bg-label-dark">{{ $j }}</span> </div>
+                    <div class="mb-3 col-lg-3 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Heading 1<span class="text-danger">*</span></label>
+                      <div class="input-group mb-1"> <span class="input-group-text">A</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_a_match_<?php echo $i; ?>" readonly placeholder="Child Labour (Prohibition and Regulation) Act Year of Legislation" row="10">{{ $questions3[$i]->option_a }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">B</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_b_match_<?php echo $i; ?>" readonly  placeholder="The Factories Act" row="10">{{ $questions3[$i]->option_b }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">C</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_c_match_<?php echo $i; ?>" readonly placeholder="The Mines Act" row="10">{{ $questions3[$i]->option_c }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">D</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_d_match_<?php echo $i; ?>" readonly placeholder="The Right of Children to Free and Compulsory Education Act" row="10">{{ $questions3[$i]->option_d }}</textarea>
+                      </div>
+                    </div>
+                    <div class="mb-3 col-lg-3 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Heading 2<span class="text-danger">*</span></label>
+                      <div class="input-group mb-1"> <span class="input-group-text">1</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_1_match_<?php echo $i; ?>" readonly placeholder="1986" row="10">{{ $questions3[$i]->option_1 }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">2</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_2_match_<?php echo $i; ?>" readonly placeholder="1952" row="10">{{ $questions3[$i]->option_2 }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">3</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_3_match_<?php echo $i; ?>" readonly placeholder="2009" row="10">{{ $questions3[$i]->option_3 }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">4</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_4_match_<?php echo $i; ?>" readonly placeholder="1948" row="10">{{ $questions3[$i]->option_4 }}</textarea>
+                      </div>
+                    </div>
+                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Choices<span class="text-danger">*</span></label>
+                      <div class="input-group form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" <?php if($questions3[$i]->choice_1==$questions3[$i]->answer) { echo 'checked'; }  ?> name="inlineRadio_<?php echo $j?>" id="inlineRadio_1_match_<?php echo $i; ?>" value="option1"> </div>
+                        <input type="text" class="form-control" readonly id="choice1_match_<?php echo $i; ?>" placeholder="A-1, B-4, C-2, D-3" value="{{ $questions3[$i]->choice_1 }}" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" <?php if($questions3[$i]->choice_2==$questions3[$i]->answer) { echo 'checked'; }  ?> name="inlineRadio_<?php echo $j?>" id="inlineRadio_2_match_<?php echo $i; ?>" value="option2"> </div>
+                        <input type="text" class="form-control" readonly id="choice2_match_<?php echo $i; ?>" placeholder="A-2, B-4, C-3, D-1" value="{{ $questions3[$i]->choice_2 }}" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" <?php if($questions3[$i]->choice_3==$questions3[$i]->answer) { echo 'checked'; }  ?> name="inlineRadio_<?php echo $j?>" id="inlineRadio_3_match_<?php echo $i; ?>" value="option3"> </div>
+                        <input type="text" class="form-control" readonly id="choice3_match_<?php echo $i; ?>" placeholder="A-3, B-2, C-1, D-4" value="{{ $questions3[$i]->choice_3 }}" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-4">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" <?php if($questions3[$i]->choice_4==$questions3[$i]->answer) { echo 'checked'; }  ?> name="inlineRadio_<?php echo $j?>" id="inlineRadio_4_match_<?php echo $i; ?>" value="option4"> </div>
+                        <input type="text" class="form-control" readonly id="choice4_match_<?php echo $i; ?>" placeholder="A-4, B-3, C-1, D-2" value="{{ $questions3[$i]->choice_4 }}" aria-label="Text input with checkbox"> </div>
+                      
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                       <button type="button" data-type="match_following" data-lessonID="{{ $lesson_id }}" data-complexity="{{ $complexity }}" data-no="{{ $i}}" class="btn btn-sm btn-label-linkedin waves-effect refetch" id="refetch_btn">
+                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
+                      </button>
+                    </div>
+                    <hr />
+                  </div>
+
+				  <?php } } } } ?>
+				 <!--type - 3 - match the following-->
+				 <!--type - 4 - Fill in blanks-->
+				 <?php 				
+				$question_type4=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','fill_blanks')->first(); 
+				if($question_type4)
+				{
+					$lesson_id=$question_type4->lesson_id;
+					$complexity=$question_type4->difficulty_level;
+				?>
+				<input type="hidden" name="question_types[]" value="fill_blanks">
+				<h5 id="pagetitle">Fill in the blanks</h5>
+				<?php $no_of_questions4=$question_type4->no_of_questions; 
+				  $questions4=App\Models\QuestionTypeFour::where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions4)->get(); 
+				  if(count($questions4)>0)
+				  {
+				  for($i=0;$i<$no_of_questions4;$i++)
+				  {
+					  if(isset($questions4[$i]))
+					  {
+					  $j=$i+1;
+				  ?>
+				   <div class="row">
+                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
+                      <br>
+                      <br>
+                      <br>
+                      <br> <span class="badge badge-center bg-label-dark">{{ $j }}</span> </div>
+                    <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
+                      <label class="form-label">Question<span class="text-danger">*</span></label>
+                      <input type="hidden" name="question_id_fill[]" id="question_id_fill_<?php echo $i; ?>" value="{{ $questions4[$i]->id }}">
+					  <textarea class="form-control" id="question_fill_blanks_<?php echo $i; ?>" readonly rows="7">{{ $questions4[$i]->question_name }}</textarea>
+                    </div>
+                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Choices<span class="text-danger">*</span></label>
+                      <div class="input-group form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_fill_blanks_<?php echo $j; ?>" <?php if($questions4[$i]->option_a==$questions4[$i]->answer) { echo 'checked'; }  ?> id="inlineRadio_1_fill_blanks_<?php echo $i; ?>" value="option1"> </div>
+                        <input type="text" class="form-control" readonly value="<?php echo $questions4[$i]->option_a; ?>" id="option_a_fill_<?php echo $i; ?>" placeholder="Choice (A)" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_fill_blanks_<?php echo $j; ?>" <?php if($questions4[$i]->option_b==$questions4[$i]->answer) { echo 'checked'; }  ?> id="inlineRadio_2_fill_blanks_<?php echo $i; ?>" value="option2"> </div>
+                        <input type="text" class="form-control" readonly value="<?php echo $questions4[$i]->option_b; ?>" id="option_b_fill_<?php echo $i; ?>" placeholder="Choice (B)" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_fill_blanks_<?php echo $j; ?>" <?php if($questions4[$i]->option_c==$questions4[$i]->answer) { echo 'checked'; }  ?> id="inlineRadio_3_fill_blanks_<?php echo $i; ?>" value="option3"> </div>
+                        <input type="text" class="form-control" readonly value="<?php echo $questions4[$i]->option_c; ?>" id="option_c_fill_<?php echo $i; ?>" placeholder="Choice (C)" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-3">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_fill_blanks_<?php echo $j; ?>" <?php if($questions4[$i]->option_d==$questions4[$i]->answer) { echo 'checked'; }  ?> id="inlineRadio_4_fill_blanks_<?php echo $i; ?>" value="option4"> </div>
+                        <input type="text" class="form-control" readonly value="<?php echo $questions4[$i]->option_d; ?>" id="option_d_fill_<?php echo $i; ?>" placeholder="Choice (D)" aria-label="Text input with checkbox"> </div>
+                      
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <button type="button" data-type="fill_blanks" data-no="{{ $i}}" data-lessonID="{{ $lesson_id }}"  data-complexity="{{ $complexity }}" class="btn btn-sm btn-label-linkedin waves-effect refetch" id="refetch_btn">
+                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
+                      </button>
+                    </div>
+                    <hr />
+                  </div>
+				  <?php } } } } ?>
+				 <!--type - 4 - Fill in blanks-->
+				 <!--type - 5 - true false-->
+				<?php 				
+				$question_type5=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','true_false')->first(); 
+				if($question_type5)
+				{
+					$lesson_id=$question_type5->lesson_id;
+					$complexity=$question_type5->difficulty_level;
+				?>
+				<input type="hidden" name="question_types[]" value="true_false">
+				<h5 id="pagetitle">True or False</h5>
+				<?php $no_of_questions5=$question_type5->no_of_questions; 
+				 $questions5=App\Models\QuestionTypeFive::where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions5)->get(); 
+				 if(count($questions5)>0){
+				 for($i=0;$i<$no_of_questions5;$i++)
+				  {
+					  if(isset($questions5[$i]))
+					  {
+					  $j=$i+1;
+				  ?>
+				  <div class="row">
+                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
+                      <br>
+                      <br>
+                      <br>
+                      <br> <span class="badge badge-center bg-label-dark">{{ $j }}</span> </div>
+                    <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
+                      <label class="form-label">Question<span class="text-danger">*</span></label>
+					  <input type="hidden" name="question_id_true_false[]" id="question_id_true_false_<?php echo $i; ?>" value="{{ $questions5[$i]->id }}">
+                      <textarea class="form-control" id="question_true_false_<?php echo $i; ?>" readonly rows="7">{{ $questions5[$i]->question_name }}</textarea>
+                    </div>
+                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Choices<span class="text-danger">*</span></label>
+                      <div class="input-group form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" <?php if($questions5[$i]->option_a==$questions5[$i]->answer) { echo 'checked'; }  ?> name="radio_true_false_<?php echo $j; ?>" id="inline_trueRadio1_<?php echo $i; ?>" value="option1"> </div>
+                        <input type="text" class="form-control" id="choice1_tf_<?php echo $i; ?>" placeholder="True" readonly value="{{ $questions5[$i]->option_a }}" aria-label="Text input with checkbox"> </div>
+                      <div class="input-group  form-check-inline mb-3">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" <?php if($questions5[$i]->option_b==$questions5[$i]->answer) { echo 'checked'; }  ?> name="radio_true_false_<?php echo $j; ?>" id="inline_trueRadio2_<?php echo $i; ?>" value="option2"> </div>
+                        <input type="text" class="form-control" id="choice2_tf_<?php echo $i; ?>" placeholder="False" readonly value="{{ $questions5[$i]->option_b }}" aria-label="Text input with checkbox"> </div>
+                      
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <button type="button" data-type="true_false" data-no="{{ $i}}"  data-lessonID="{{ $lesson_id }}" data-complexity="{{ $complexity }}" class="btn btn-sm btn-label-linkedin waves-effect refetch" id="refetch_btn">
+                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
+                      </button>
+                    </div>
+                    <hr />
+                  </div>
+
+				<?php }}}} ?>
+				 <!--type - 5 - true false-->
+				 <!--type - 6 - Short answers-->
+				  <?php 				
+				$question_type6=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','short_answer')->first(); 
+				if($question_type6)
+				{
+					$lesson_id=$question_type6->lesson_id;
+					$complexity=$question_type6->difficulty_level;
+				?>
+				<input type="hidden" name="question_types[]" value="short_answer">
+				  <h5 id="pagetitle">Short Answer</h5>
+				  <?php $no_of_questions6=$question_type6->no_of_questions;
+					$questions6=App\Models\QuestionTypeSix::where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions6)->get(); 				  
+				  if(count($questions6)>0)
+				  {
+				  for($i=0;$i<$no_of_questions6;$i++)
+				  {
+					  if(isset($questions6[$i]))
+					  {
+					  $j=$i+1;
+				  ?>
                   <div class="row">
                     <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
                       <br>
                       <br>
                       <br>
                       <br>
-                      <span class="badge badge-center bg-label-dark">2</span>
+                      <span class="badge badge-center bg-label-dark">{{ $j }}</span>
                     </div>
                     <div class="mb-3 col-lg-7 col-xl-5 col-12 mb-0">
-                      <label class="form-label">Question<span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="exampleFormControlTextarea1" rows="7"></textarea>
+                      <input type="hidden" name="question_id_short_answers[]" id="question_id_shortanswer_<?php echo $i; ?>" value="{{ $questions6[$i]->id }}">
+					  <label class="form-label">Question<span class="text-danger">*</span></label>
+                      <textarea class="form-control" id="question_shortanswer_<?php echo $i; ?>" rows="7" readonly>{{ $questions6[$i]->question_name }} </textarea>
                     </div>
                     <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
                       <label class="form-label">Answer<span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="shortanswer" rows="7"></textarea>
+                      <textarea class="form-control" id="answer_shortanswer_<?php echo $i; ?>" rows="7" readonly>{{ $questions6[$i]->answer }}</textarea>
                     </div>
                     <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
                       <br>
                       <br>
                       <br>
                       <br>
-                      <button type="button" class="btn btn-sm btn-label-linkedin waves-effect">
+                      <button type="button" data-type="short_answer" data-lessonID="{{ $lesson_id }}" data-complexity="{{ $complexity }}" data-no="{{ $i}}" class="btn btn-sm btn-label-linkedin waves-effect refetch">
                         <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
                       </button>
                     </div>
                     <hr />
                   </div>
+				  <?php } }} } ?>
+				  <!--type - 6 - Short answers-->
+				  <!--type - 7 - Order Sequencing-->
+				   <?php 				
+				$question_type7=App\Models\ExamQuestionType::where('exam_id',$exam_id)->where('question_type','order_sequence')->first(); 
+				if($question_type7)
+				{
+					$lesson_id=$question_type7->lesson_id;
+					$complexity=$question_type7->difficulty_level;
+					
+				?>
+				<input type="hidden" name="question_types[]" value="order_sequence">
+				<h5 id="pagetitle">Ordering/Sequences</h5>
+				<?php $no_of_questions7=$question_type7->no_of_questions;
+					$questions7=App\Models\QuestionTypeSeven::where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder('id')->limit($no_of_questions7)->get(); 				  
+				  if(count($questions7)>0)
+				  {
+				  for($i=0;$i<$no_of_questions7;$i++)
+				  {
+					  if(isset($questions7[$i]))
+					  {
+					  $j=$i+1;
+				  ?>
+				  <div class="row">
+                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
+                      <br>
+                      <br>
+                      <br>
+                      <br> <span class="badge badge-center bg-label-dark">{{ $j }}</span> </div>
+                    <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
+                      <label class="form-label">Question<span class="text-danger">*</span></label>
+					  <input type="hidden" name="question_id_order_seq[]" id="question_id_order_seq_<?php echo $i; ?>" value="{{ $questions7[$i]->id }}">
+                      <textarea class="form-control mb-2" id="question_order_sequence_<?php echo $i; ?>" rows="3" placeholder="Arrange the following steps in the correct order in which they appear in the process of adaptation." readonly>{{ $questions7[$i]->question_name }}</textarea>
+                      <div class="input-group mb-1"> <span class="input-group-text">A</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_a_order_seq_<?php echo $i; ?>" placeholder="You gradually feel better and decrease sweating." readonly>{{ $questions7[$i]->option_a }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">B</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_b_order_seq_<?php echo $i; ?>" placeholder="Sudden increase in the temperature of the environment." readonly>{{ $questions7[$i]->option_b }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">C</span>
+                        <textarea class="form-control" aria-label="With textarea" id="option_c_order_seq_<?php echo $i; ?>" placeholder="Eventually you stop sweating and then feel completely normal." readonly>{{ $questions7[$i]->option_c }}</textarea>
+                      </div>
+                      <div class="input-group mb-1"> <span class="input-group-text">D</span>
+                        <textarea class="form-control" aria-label="With textarea"id="option_d_order_seq_<?php echo $i; ?>"  placeholder="You feel very hot and start sweating." readonly>{{ $questions7[$i]->option_d }}</textarea>
+                      </div>
+                    </div>
+                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
+                      <label class="form-label">Choices<span class="text-danger">*</span></label>
+                      <div class="input-group form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_orderOptions_<?php echo $j; ?>" <?php if($questions7[$i]->option_1==$questions7[$i]->answer) { echo 'checked'; }  ?> id="inline_orderRadio1_<?php echo $i; ?>" value="option1"> </div>
+                        <input type="text" class="form-control" placeholder="A,B,C,D" aria-label="Text input with checkbox" id="option_1_order_seq_<?php echo $i; ?>" readonly value="{{ $questions7[$i]->option_1 }}"> </div>
+                      <div class="input-group  form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_orderOptions_<?php echo $j; ?>" <?php if($questions7[$i]->option_2==$questions7[$i]->answer) { echo 'checked'; }  ?> id="inline_orderRadio2_<?php echo $i; ?>" value="option2"> </div>
+                        <input type="text" class="form-control" placeholder="B,C,D,A" aria-label="Text input with checkbox" id="option_2_order_seq_<?php echo $i; ?>" readonly value="{{ $questions7[$i]->option_2 }}"> </div>
+                      <div class="input-group  form-check-inline mb-1">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_orderOptions_<?php echo $j; ?>" <?php if($questions7[$i]->option_3==$questions7[$i]->answer) { echo 'checked'; }  ?> id="inline_orderRadio3_<?php echo $i; ?>" value="option2"> </div>
+                        <input type="text" class="form-control" placeholder="B,D,A,C" aria-label="Text input with checkbox" id="option_3_order_seq_<?php echo $i; ?>" readonly value="{{ $questions7[$i]->option_3 }}"> </div>
+                      <div class="input-group  form-check-inline mb-4">
+                        <div class="input-group-text">
+                          <input class="form-check-input" type="radio" name="inlineRadio_orderOptions_<?php echo $j; ?>" <?php if($questions7[$i]->option_4==$questions7[$i]->answer) { echo 'checked'; }  ?> id="inline_orderRadio4_<?php echo $i; ?>" value="option2"> </div>
+                        <input type="text" class="form-control" placeholder="B,D,C,A" aria-label="Text input with checkbox" id="option_4_order_seq_<?php echo $i; ?>" readonly value="{{ $questions7[$i]->option_4 }}"> </div>
+                      
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <button type="button" data-type="order_sequence" data-lessonID="{{ $lesson_id }}" data-complexity="{{ $complexity }}" data-no="{{ $i}}" class="btn btn-sm btn-label-linkedin waves-effect refetch" id="refetch_btn">
+                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
+                      </button>
+                    </div>
+                    <hr />
+                  </div>
+                
+				  <?php } }} } ?>
+				  <!--type - 7 - Order Sequencing-->
                 </div>
               </div>
+			  
+			  <div class="pt-4" style="float: right;">
+              <button type="button" class="btn-label-secondary waves-effect previous_button me-3" id="previous_button" style="border-color: transparent !important; background: rgb(234, 235, 236) !important; color: rgb(168, 170, 174) !important; display: none;">Previous</button>
+              <button type="submit" class="btn-primary me-sm-3 me-1 waves-effect waves-light question_paper_cta" id="logo_color" style="float: right;">Next<i class="tf-icons ti ti-chevron-right ti-xs"></i></button>
+            </div>
+			<br>
+			  <?php } ?>
               <div class="card" id="exam_creation">
-                <form class="card-body">
+                <form class="card-body" method="POST" action="{{ route('exam_details_update') }}">
+				@csrf
+				<input type="hidden" name="exam_id" value="{{ $exam_id }}">
                   <div class="row mb-3 g-3">
                     <div class="col-md-6">
                       <label class="form-label" for="multicol-first-name">Exam Name</label>
-                      <input type="text" class="form-control" placeholder="Weekly Exam" />
+                      <input type="text" class="form-control" name="exam_name" required placeholder="Weekly Exam" />
                     </div>
                     <div class="col-md-6">
                       <label class="form-label" for="multicol-last-name">Total Marks</label>
-                      <input type="number" class="form-control" placeholder="100" />
+                      <input type="number" class="form-control" name="total_marks" required placeholder="100" />
                     </div>
                     <div class="col-md-6">
                       <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                      <input type="number" class="form-control" placeholder="50" />
+                      <input type="number" class="form-control" name="passing_mark" required placeholder="50" />
                     </div>
                     <div class="col-md-6">
                       <label for="bs-datepicker-format" class="form-label">Duration</label>
-                      <input type="text" id="timepicker-format" placeholder="HH:MM:SS" class="form-control" />
+                      <input type="text" id="timepicker-format" name="duration" required placeholder="HH:MM:SS" class="form-control" />
                     </div>
-
-                    <div class="mb-3 col-md-6">
+					
+					<div class="mb-3 col-md-6">
+					<label class="form-label">Exam Type</label>
+                      <select class="form-control" required id="exam_type" name="exam_type">
+					  <option value="">Select Exam Type</option>
+					  <option value="1">Flexible</option>
+					  <option value="2">Strict</option>
+					  </select>
+					  
+                    </div>
+                    <div class="mb-3 col-md-6 jp_exam_end_date">
                       <label class="form-label">Exam End Date</label>
-                      <input type="text" value="30-05-2024" class="form-control" />
+                      <input type="text" value="30-05-2024" name="exam_end_date" id="flatpickr-date1"  class="form-control" />
                     </div>
-                    <div class="mb-3 col-md-6"></div>
+                    
 
                     <div class="col-md-4">
                       <label for="bs-rangepicker-single" class="form-label">Publish On</label>
-                      <input type="text" class="form-control publish_on" placeholder="DD-MM-YYYY HH:MM" id="flatpickr-datetime" />
+                      <input type="text" class="form-control publish_on" name="publish_on" placeholder="DD-MM-YYYY HH:MM" id="flatpickr-datetime" />
                     </div>
-                    <div class="col-md-1" style="top: 14px;position: relative;">
+                    <div class="col-md-1 jp_publish" style="top: 14px;position: relative;">
                       <div class="divider divider-vertical divider-danger">
                         <div class="divider-text">OR</div>
                       </div>
                     </div>
-                    <div class="col-md-3" style="top: 33px;position: relative;">
+                    <div class="col-md-3 jp_publish" style="top: 33px;position: relative;">
                       <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" id="chkPassport1">
+                        <input class="form-check-input" type="checkbox" name="publish_now" id="chkPassport1">
                         <label class="form-check-label" for="chkPassport1">Publish Now</label>
                       </div>
                     </div>
@@ -580,10 +1026,7 @@
                 </form>
               </div>
             </div>
-            <div class="pt-4" style="float: right;">
-              <button type="button" class="btn-label-secondary waves-effect previous_button me-3" id="previous_button" style="border-color:transparent !important;background: #eaebec !important; color: #a8aaae !important;">Previous</button>
-              <button type="submit" class="btn-primary me-sm-3 me-1 waves-effect waves-light question_paper_cta" id="logo_color" style="float: right;">Next<i class="tf-icons ti ti-chevron-right ti-xs"></i></button>
-            </div>
+            
 
           </div>
         </div>
@@ -632,10 +1075,10 @@
 
       // Refresh Button
 
-      $('#refetch_btn').click(function() {
+      /*$('#refetch_btn').click(function() {
         $('.answer_8').val('');
         $('#question_8').val('');
-      });
+      });*/
 
 
       // Exam Creation
@@ -651,7 +1094,13 @@
         $('.question_paper_cta').hide();
 
       });
-
+$('.previous_button').click(function(){
+	$('#question_paper').show();
+        $('#questionpaper_creation').show();
+        $('#exam_creation').hide();
+        $('.previous_button').hide();
+        $('.question_paper_cta').show();
+});
 
     });
   </script>
@@ -731,6 +1180,7 @@
           var optionValue1 = $(this).attr("value");
           if (optionValue1) {
             $('#paper_lesson_div').show();
+			$('#form_submit_jp').show();
 			//$('#paper_type_div').show();
             //$('#form_submit').show();
 			//ajax lessons			  
@@ -764,7 +1214,8 @@
           }
         });
       });
-$('#myform').on('change', '.chkPassport', function () {	  
+$('#myform').on('change', '.chkPassport', function () {
+$('#multiSelectDropdown').html($('.chkPassport:checked').length+' Lessons');	
         if ($('.chkPassport:checked').length == 0) {
           $('#paper_type_div').hide();
           $('#form_submit').hide();
@@ -803,7 +1254,7 @@ $('#myform').on('change', '.chkPassport', function () {
 		 $('.chkPassport:checked').each(function() {			 
 			 select_content=select_content+'<option value="'+$(this).val()+'">'+$(this).parent().text()+'</option>';
           });
-      $('.block:last').before('<div class="block mb-2"><div class="d-flex"><div class="row"><div class="col-3"><select id="smallSelect" class="lessonsDD  form-select form-select-sm"><option value="">Select Lesson</option>'+select_content+'</select></div><div class="col-3"><select id="smallSelect" class="form-select form-select-sm"><option value="">Select Questions</option><option value="mcq_1">Multiple Choice Single Answer</option><option value="mcq_2">Multiple Choice Multiple Answers</option><option value="match_following">Match the Following</option><option value="fill_blanks">Fill in the blanks</option><option value="true_false">True or False</option><option value="short_answer">Short Answer</option><option value="order_sequence">Order/Sequencing</option></select></div><div class="col-3"><select id="smallSelect" class="form-select form-select-sm"><option value="">Difficulty Level</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div><div class="col-2"><input class="form-control form-control-sm" id="defaultFormControlInput" placeholder="No.Of Questions" aria-describedby="defaultFormControlHelp"></div><div class="col-1"><span class="badge badge-center rounded-pill bg-label-danger remove" style="position:relative;top:4px"><i class="ti ti-minus"></i></span></div></div></div></div>');
+      $('.block:last').before('<div class="block mb-2"><div class="d-flex"><div class="row"><div class="col-3"><select id="smallSelect" name="individual_lesson_id[]" required class="lessonsDD  form-select form-select-sm"><option value="">Select Lesson</option>'+select_content+'</select></div><div class="col-3"><select name="question_type[]" required id="smallSelect" class="form-select form-select-sm"><option value="">Select Questions</option><option value="mcq_1">Multiple Choice Single Answer</option><option value="mcq_2">Multiple Choice Multiple Answers</option><option value="match_following">Match the Following</option><option value="fill_blanks">Fill in the blanks</option><option value="true_false">True or False</option><option value="short_answer">Short Answer</option><option value="order_sequence">Order/Sequencing</option></select></div><div class="col-3"><select name="difficulty_level[]" required id="smallSelect" class="form-select form-select-sm"><option value="">Difficulty Level</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div><div class="col-2"><input name="question_count[]" required class="form-control form-control-sm" id="defaultFormControlInput" placeholder="No.Of Questions" aria-describedby="defaultFormControlHelp"></div><div class="col-1"><span style="cursor: pointer;" class="badge badge-center rounded-pill bg-label-danger remove" style="position:relative;top:4px"><i class="ti ti-minus"></i></span></div></div></div></div>');
     });
     $('.optionBox').on('click', '.remove', function() {
       $(this).parent().parent().remove();
@@ -812,12 +1263,12 @@ $('#myform').on('change', '.chkPassport', function () {
 
   <script>
     $(document).ready(function() {
-      $('#question_paper').hide();
-      $('.question_paper_cta').hide();
+     // $('#question_paper').hide();
+      //$('.question_paper_cta').hide();
 
       $("#form_submit").click(function() {
-        $('#question_paper').show();
-        $('.question_paper_cta').show();
+        //$('#question_paper').show();
+        //$('.question_paper_cta').show();
       });
 
     });
@@ -835,8 +1286,8 @@ $('#myform').on('change', '.chkPassport', function () {
 
         $('.lists_assessments').hide();
         $('#assessment_lists').hide();
-        //$('#questionpaper_creation').hide();
-        $('#question_paper').hide();
+        $('#questionpaper_creation').hide();
+        //$('#question_paper').hide();
         $('.question_paper_creation').hide();
 
       });
@@ -1052,206 +1503,6 @@ $('#myform').on('change', '.chkPassport', function () {
     });
   </script>
 
-
-  <!-- Multiple Choice Multiple Answers -->
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#multiple_answer .add_button'); //Add button selector
-      var wrapper = $('#multiple_answer .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0"><label class="form-label">Question<span class="text-danger">*</span></label><textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea></div><div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0"><label class="form-label">Choices<span class="text-danger">*</span></label><div class="input-group mb-1"><div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" aria-label="Checkbox for following text input"></div><input class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox"></div><div class="input-group mb-1"><div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" aria-label="Checkbox for following text input"></div><input class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox"></div><div class="input-group mb-1"><div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" aria-label="Checkbox for following text input"></div><input class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox"></div><div class="input-group mb-3"><div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" aria-label="Checkbox for following text input"></div><input class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox"></div><label for="defaultSelect" class="form-label">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        $(wrapper).append(fieldHTML); //Add field html
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-  <!-- Multiple Choice Single Answer -->
-
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#single_answer .add_button'); //Add button selector
-      var wrapper = $('#single_answer .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0"><label class="form-label">Question<span class="text-danger">*</span></label><textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea></div><div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0"><label class="form-label">Choices<span class="text-danger">*</span></label><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option1"></div><input class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option2"></div><input class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option3"></div><input class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-3"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option4"></div><input class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox"></div><label for="defaultSelect" class="form-label">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        var radiobtn = $(fieldHTML).find('.form-check-input').attr('id');
-        x++;
-        $(wrapper).append(fieldHTML); //Add field html
-        $(radiobtn).attr('name', 'inlineRadioOptions' + x);
-        $(radiobtn).attr('id', 'inlineRadio' + x);
-        // alert(x);
-        // alert(radiobtn);
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-  <!-- Fill in the Blanks -->
-
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#fill_blanks .add_button'); //Add button selector
-      var wrapper = $('#fill_blanks .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0"><label class="form-label">Question<span class="text-danger">*</span></label><textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea></div><div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0"><label class="form-label">Choices<span class="text-danger">*</span></label><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option1"></div><input class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option2"></div><input class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option3"></div><input class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-3"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option4"></div><input class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox"></div><label for="defaultSelect" class="form-label">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        var radiobtn = $(fieldHTML).find('.form-check-input').attr('id');
-        x++;
-        $(wrapper).append(fieldHTML); //Add field html
-        $(radiobtn).attr('name', 'inlineRadioOptions' + x);
-        $(radiobtn).attr('id', 'inlineRadio' + x);
-        // alert(x);
-        // alert(radiobtn);
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-  <!-- True or False -->
-
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#true_false .add_button'); //Add button selector
-      var wrapper = $('#true_false .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0"><label class="form-label">Question<span class="text-danger">*</span></label><textarea class="form-control" id="exampleFormControlTextarea1" rows="6"></textarea></div><div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0"><label class="form-label">Choices<span class="text-danger">*</span></label><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_trueOptions" id="inline_trueRadio" value="option1"></div><input class="form-control" placeholder="True" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-3"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_trueOptions" id="inline_trueRadio" value="option2"></div><input class="form-control" placeholder="False" aria-label="Text input with checkbox"></div><label for="defaultSelect" class="form-label">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        var radiobtn = $(fieldHTML).find('.form-check-input').attr('id');
-        x++;
-        $(wrapper).append(fieldHTML); //Add field html
-        $(radiobtn).attr('name', 'inlineRadioOptions' + x);
-        $(radiobtn).attr('id', 'inlineRadio' + x);
-        // alert(x);
-        // alert(radiobtn);
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-  <!-- Short Answer -->
-
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#short_answer .add_button'); //Add button selector
-      var wrapper = $('#short_answer .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-7 col-xl-4 col-12 mb-0"><label class="form-label">Question<span class="text-danger">*</span></label><textarea class="form-control" id="exampleFormControlTextarea1" rows="4"></textarea></div><div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0"><label class="form-label">Answer<span class="text-danger">*</span></label><textarea class="form-control" id="shortanswer" rows="4"></textarea></div><div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0"><br><br><label for="defaultSelect" class="form-label">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        var radiobtn = $(fieldHTML).find('.form-check-input').attr('id');
-        x++;
-        $(wrapper).append(fieldHTML); //Add field html
-        $(radiobtn).attr('name', 'inlineRadioOptions' + x);
-        $(radiobtn).attr('id', 'inlineRadio' + x);
-        // alert(x);
-        // alert(radiobtn);
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-  <!-- Match the Following -->
-
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#match_following .add_button'); //Add button selector
-      var wrapper = $('#match_following .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-3 col-xl-4 col-12 mb-0"><label class="form-label">Heading 1<span class="text-danger">*</span></label><div class="input-group mb-1"><span class="input-group-text">A</span><textarea class="form-control" aria-label="With textarea" placeholder="Child Labour (Prohibition and Regulation) Act Year of Legislation" row="10"></textarea></div><div class="input-group mb-1"><span class="input-group-text">B</span><textarea class="form-control" aria-label="With textarea" placeholder="The Factories Act" row="10"></textarea></div><div class="input-group mb-1"><span class="input-group-text">C</span><textarea class="form-control" aria-label="With textarea" placeholder="The Mines Act" row="10"></textarea></div><div class="input-group mb-1"><span class="input-group-text">D</span><textarea class="form-control" aria-label="With textarea" placeholder="The Right of Children to Free and Compulsory Education Act" row="10"></textarea></div></div><div class="mb-3 col-lg-3 col-xl-4 col-12 mb-0"><label class="form-label">Heading 2<span class="text-danger">*</span></label><div class="input-group mb-1"><span class="input-group-text">1</span><textarea class="form-control" aria-label="With textarea" placeholder="1986" row="10"></textarea></div><div class="input-group mb-1"><span class="input-group-text">2</span><textarea class="form-control" aria-label="With textarea" placeholder="1952" row="10"></textarea></div><div class="input-group mb-1"><span class="input-group-text">3</span><textarea class="form-control" aria-label="With textarea" placeholder="2009" row="10"></textarea></div><div class="input-group mb-1"><span class="input-group-text">4</span><textarea class="form-control" aria-label="With textarea" placeholder="1948" row="10"></textarea></div></div><div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0"><label class="form-label">Choices<span class="text-danger">*</span></label><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions_match1" id="inlineRadio_match1" value="option1"></div><input class="form-control" placeholder="A-1, B-4, C-2, D-3" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions_match1" id="inlineRadio_match1" value="option2"></div><input class="form-control" placeholder="A-2, B-4, C-3, D-1" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions_match1" id="inlineRadio_match" value="option3"></div><input class="form-control" placeholder="A-3, B-2, C-1, D-4" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-4"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadioOptions_match1" id="inlineRadio_match1" value="option4"></div><input class="form-control" placeholder="A-4, B-3, C-1, D-2" aria-label="Text input with checkbox"></div><label for="defaultSelect" class="form-label">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        var radiobtn = $(fieldHTML).find('.form-check-input').attr('id');
-        x++;
-        $(wrapper).append(fieldHTML); //Add field html
-        $(radiobtn).attr('name', 'inlineRadioOptions' + x);
-        $(radiobtn).attr('id', 'inlineRadio' + x);
-        // alert(x);
-        // alert(radiobtn);
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-  <!-- Order/Sequencing -->
-
-  <script>
-    $(document).ready(function() {
-      var addButton = $('#order_sequence .add_button'); //Add button selector
-      var wrapper = $('#order_sequence .group-a'); //Input field wrapper
-      var fieldHTML = '<div class="row"><div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0"><label class="form-label">Question<span class="text-danger">*</span></label><textarea class="form-control mb-2" id="order_sequenceTextarea1" rows="3" placeholder="Arrange the following steps in the correct order in which they appear in the process of adaptation."></textarea><div class="input-group mb-1"><span class="input-group-text">A</span><textarea class="form-control" aria-label="With textarea" placeholder="You gradually feel better and decrease sweating."></textarea></div><div class="input-group mb-1"><span class="input-group-text">B</span><textarea class="form-control" aria-label="With textarea" placeholder="Sudden increase in the temperature of the environment."></textarea></div><div class="input-group mb-1"><span class="input-group-text">C</span><textarea class="form-control" aria-label="With textarea" placeholder="Eventually you stop sweating and then feel completely normal."></textarea></div><div class="input-group mb-1"><span class="input-group-text">D</span><textarea class="form-control" aria-label="With textarea" placeholder="You feel very hot and start sweating."></textarea></div></div><div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0"><label class="form-label">Choices<span class="text-danger">*</span></label><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option1"></div><input class="form-control" placeholder="A,B,C,D" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option2"></div><input class="form-control" placeholder="B,C,D,A" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-1"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option2"></div><input class="form-control" placeholder="B,D,A,C" aria-label="Text input with checkbox"></div><div class="input-group form-check-inline mb-4"><div class="input-group-text"><input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option2"></div><input class="form-control" placeholder="B,D,C,A" aria-label="Text input with checkbox"></div><label for="defaultSelect" class="form-label mt-4">Difficulty Level</label><select id="smallSelect" class="form-select form-select-sm"><option>Select</option><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div><div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0"><br><a href="javascript:void(0);" class="remove_button"><i class="fa-solid fa-circle-minus"></i></a></div><hr></div>'; //New input field html
-      var x = 1; //Initial field counter is 1
-
-      // Once add button is clicked
-      $(addButton).click(function() {
-        var radiobtn = $(fieldHTML).find('.form-check-input').attr('id');
-        x++;
-        $(wrapper).append(fieldHTML); //Add field html
-        $(radiobtn).attr('name', 'inlineRadioOptions' + x);
-        $(radiobtn).attr('id', 'inlineRadio' + x);
-        // alert(x);
-        // alert(radiobtn);
-      });
-
-      // Once remove button is clicked
-      $(wrapper).on('click', '.remove_button', function(e) {
-        e.preventDefault();
-        $(this).parent('div').parent('div').remove(); //Remove field html
-        x--; //Decrease field counter
-      });
-    });
-  </script>
-
-
-
-
   <script src="assets/js/form-input-group.js"></script>
   <script>
     document.getElementById("downloadButton").addEventListener("click", function() {
@@ -1270,6 +1521,353 @@ $('#myform').on('change', '.chkPassport', function () {
     new DataTable('#question_bank_list', {
       scrollX: true
     });
+	$('.refetch').click(function(){
+		var q_type=$(this).attr('data-type');
+		
+		var no=$(this).attr('data-no');
+		var lesson_id=$(this).attr('data-lessonID');
+		var complexity=$(this).attr('data-complexity');
+		var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+		if(q_type=='mcq_1')
+		{
+			var arr = $('input[name="question_id_mcq1[]"]').map(function () {
+				return this.value; // $(this).val()
+			}).get(); 
+		
+			$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity },
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+					
+                       $('#question_id_mcq1_'+no).val(data['alt_question']['id']);
+					   $('#question_mcq1_'+no).val(data['alt_question']['question_name']);
+					   
+					   $('#choice1_mcq1_'+no).val(data['alt_question']['option_a']);
+					   $('#choice2_mcq1_'+no).val(data['alt_question']['option_b']);
+					   $('#choice3_mcq1_'+no).val(data['alt_question']['option_c']);
+					   $('#choice4_mcq1_'+no).val(data['alt_question']['option_d']);
+					   
+					   if(data['alt_question']['option_a']== data['alt_question']['answer'])
+						$("#radio1_mcq1_"+no).prop("checked", true);
+					  if(data['alt_question']['option_b']== data['alt_question']['answer'])
+						$("#radio2_mcq1_"+no).prop("checked", true);
+					if(data['alt_question']['option_c']== data['alt_question']['answer'])
+						$("#radio3_mcq1_"+no).prop("checked", true);
+					if(data['alt_question']['option_d']== data['alt_question']['answer'])
+						$("#radio4_mcq1_"+no).prop("checked", true);
+                    }
+                }); 		
+		}
+		if(q_type=='mcq_2')
+		{
+			var arr = $('input[name="question_id_mcq2[]"]').map(function () {
+				return this.value; // $(this).val()
+			}).get(); 
+		
+			$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity},
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+					
+                       $('#question_id_mcq2_'+no).val(data['alt_question']['id']);
+					   $('#question_mcq2_'+no).val(data['alt_question']['question_name']);
+					   
+					   $('#choice1_mcq2_'+no).val(data['alt_question']['option_a']);
+					   $('#choice2_mcq2_'+no).val(data['alt_question']['option_b']);
+					   $('#choice3_mcq2_'+no).val(data['alt_question']['option_c']);
+					   $('#choice4_mcq2_'+no).val(data['alt_question']['option_d']);
+					   
+					   var text=data['alt_question']['answer'];
+					   const ansArray = text.split(",");
+					   console.log(ansArray);
+					   $("#check1_mcq2_"+no).prop("checked", false);
+					    $("#check2_mcq2_"+no).prop("checked", false);
+						 $("#check3_mcq2_"+no).prop("checked", false);
+						  $("#check4_mcq2_"+no).prop("checked", false);
+					   if( ansArray.includes(data['alt_question']['option_a']) )
+						  $("#check1_mcq2_"+no).prop("checked", true);
+					  if( ansArray.includes(data['alt_question']['option_b'])  )
+						$("#check2_mcq2_"+no).prop("checked", true);
+					if( ansArray.includes(data['alt_question']['option_c']) )
+						$("#check3_mcq2_"+no).prop("checked", true);
+					if(ansArray.includes(data['alt_question']['option_d']) )
+						$("#check4_mcq2_"+no).prop("checked", true);
+                    }
+                }); 		
+		}
+		if(q_type=='match_following')
+		{
+			var arr = $('input[name="question_id_match[]"]').map(function () {
+				return this.value; // $(this).val()
+			}).get(); 
+		
+			$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity },
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+					
+                       $('#question_id_match_'+no).val(data['alt_question']['id']);
+					   
+					   $('#option_a_match_'+no).val(data['alt_question']['option_a']);
+					   $('#option_b_match_'+no).val(data['alt_question']['option_b']);
+					   $('#option_c_match_'+no).val(data['alt_question']['option_c']);
+					   $('#option_d_match_'+no).val(data['alt_question']['option_d']);
+					   
+					   $('#option_1_match_'+no).val(data['alt_question']['option_1']);
+					   $('#option_2_match_'+no).val(data['alt_question']['option_2']);
+					   $('#option_3_match_'+no).val(data['alt_question']['option_3']);
+					   $('#option_4_match_'+no).val(data['alt_question']['option_4']);
+					   
+					   
+					   $('#choice1_match_'+no).val(data['alt_question']['choice_1']);
+					   $('#choice2_match_'+no).val(data['alt_question']['choice_2']);
+					   $('#choice3_match_'+no).val(data['alt_question']['choice_3']);
+					   $('#choice4_match_'+no).val(data['alt_question']['choice_4']);
+					   
+					   if(data['alt_question']['choice_1']== data['alt_question']['answer'])
+						$("#inlineRadio_1_match_"+no).prop("checked", true);
+					  if(data['alt_question']['choice_2']== data['alt_question']['answer'])
+						$("#inlineRadio_2_match_"+no).prop("checked", true);
+					if(data['alt_question']['choice_3']== data['alt_question']['answer'])
+						$("#inlineRadio_3_match_"+no).prop("checked", true);
+					if(data['alt_question']['choice_4']== data['alt_question']['answer'])
+						$("#inlineRadio_4_match_"+no).prop("checked", true);
+                    }
+                }); 		
+		}
+		if(q_type=='fill_blanks')
+		{
+			var arr = $('input[name="question_id_fill[]"]').map(function () {
+				return this.value; // $(this).val()
+			}).get(); 
+		console.log(arr);
+			$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity },
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+					
+                       $('#question_id_fill_'+no).val(data['alt_question']['id']);
+					   $('#question_fill_blanks_'+no).val(data['alt_question']['question_name']);
+					   
+					   $('#option_a_fill_'+no).val(data['alt_question']['option_a']);
+					   $('#option_b_fill_'+no).val(data['alt_question']['option_b']);
+					   $('#option_c_fill_'+no).val(data['alt_question']['option_c']);
+					   $('#option_d_fill_'+no).val(data['alt_question']['option_d']);
+					   
+					   if(data['alt_question']['option_a']== data['alt_question']['answer'])
+						$("#inlineRadio_1_fill_blanks_"+no).prop("checked", true);
+					  if(data['alt_question']['option_b']== data['alt_question']['answer'])
+						$("#inlineRadio_2_fill_blanks_"+no).prop("checked", true);
+					if(data['alt_question']['option_c']== data['alt_question']['answer'])
+						$("#inlineRadio_3_fill_blanks_"+no).prop("checked", true);
+					if(data['alt_question']['option_d']== data['alt_question']['answer'])
+						$("#inlineRadio_4_fill_blanks_"+no).prop("checked", true);
+                    
+					}
+                }); 		
+		}
+		if(q_type=='true_false')
+		{
+			var arr = $('input[name="question_id_true_false[]"]').map(function () {
+				return this.value; // $(this).val()
+			}).get(); 
+		
+			$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity },
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+					
+                       $('#question_id_true_false_'+no).val(data['alt_question']['id']);
+					   $('#question_true_false_'+no).val(data['alt_question']['question_name']);
+					   
+					   $('#choice1_tf_'+no).val(data['alt_question']['option_a']);
+					   $('#choice2_tf_'+no).val(data['alt_question']['option_b']);
+					   
+					   if(data['alt_question']['option_a']== data['alt_question']['answer'])
+						$("#inline_trueRadio1_"+no).prop("checked", true);
+					  if(data['alt_question']['option_b']== data['alt_question']['answer'])
+						$("#inline_trueRadio2_"+no).prop("checked", true);
+					
+                    }
+                }); 		
+		}
+		if(q_type=='short_answer')
+		{
+	
+			var arr = $('input[name="question_id_short_answers[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+console.log(arr);
+				$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity },
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+						$('#question_id_shortanswer_'+no).val(data['alt_question']['id']);
+					   $('#question_shortanswer_'+no).val(data['alt_question']['question_name']);
+					   $('#answer_shortanswer_'+no).val(data['alt_question']['answer']);
+					   
+					}
+				});
+		}
+		if(q_type=='order_sequence')
+		{
+			var arr = $('input[name="question_id_order_seq[]"]').map(function () {
+				return this.value; // $(this).val()
+			}).get(); 
+		
+			$.ajax({
+                   
+                    url: '{{ route("fetch_question") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {_token: CSRF_TOKEN, q_type:q_type, arr:arr, lesson_id:lesson_id, complexity:complexity },
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+					
+                       $('#question_id_order_seq_'+no).val(data['alt_question']['id']);
+					   $('#question_order_sequence_'+no).val(data['alt_question']['question_name']);
+					   
+					   $('#option_a_order_seq_'+no).val(data['alt_question']['option_a']);
+					   $('#option_b_order_seq_'+no).val(data['alt_question']['option_b']);
+					   $('#option_c_order_seq_'+no).val(data['alt_question']['option_c']);
+					   $('#option_d_order_seq_'+no).val(data['alt_question']['option_d']);
+					   
+					   $('#option_1_order_seq_'+no).val(data['alt_question']['option_1']);
+					   $('#option_2_order_seq_'+no).val(data['alt_question']['option_2']);
+					   $('#option_3_order_seq_'+no).val(data['alt_question']['option_3']);
+					   $('#option_4_order_seq_'+no).val(data['alt_question']['option_4']);
+					   
+					   if(data['alt_question']['option_1']== data['alt_question']['answer'])
+						$("#inline_orderRadio1_"+no).prop("checked", true);
+					  if(data['alt_question']['option_2']== data['alt_question']['answer'])
+						$("#inline_orderRadio2_"+no).prop("checked", true);
+					if(data['alt_question']['option_3']== data['alt_question']['answer'])
+						$("#inline_orderRadio3_"+no).prop("checked", true);
+					if(data['alt_question']['option_4']== data['alt_question']['answer'])
+						$("#inline_orderRadio4_"+no).prop("checked", true);
+                    }
+                }); 		
+		}
+	});
+	$('.question_paper_cta').click(function(){
+		var exam_id=$('#exam_id').val();
+		var q_types_arr = $('input[name="question_types[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_1_arr = $('input[name="question_id_mcq1[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_2_arr = $('input[name="question_id_mcq2[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_3_arr = $('input[name="question_id_match[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_4_arr = $('input[name="question_id_fill[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_5_arr = $('input[name="question_id_true_false[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_6_arr = $('input[name="question_id_short_answers[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var q_7_arr = $('input[name="question_id_order_seq[]"]').map(function () {
+    return this.value; // $(this).val()
+}).get();
+var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+$.ajax({
+                   
+                    url: '{{ route("exam_questions_add") }}',
+                    type: 'POST',
+                    /* send the csrf-token and the input to the controller */
+                    data: {
+						_token: CSRF_TOKEN,
+						exam_id:exam_id, 
+						q_types_arr:q_types_arr, 
+						q_1_arr:q_1_arr, 
+						q_2_arr:q_2_arr,
+						q_3_arr:q_3_arr,
+						q_4_arr:q_4_arr,
+						q_5_arr:q_5_arr,
+						q_6_arr:q_6_arr, 
+						q_7_arr:q_7_arr
+						},
+                    dataType: 'JSON',
+                    /* remind that 'data' is the response of the AjaxController */
+                    success: function (data) {
+						
+					}
+				});
+	});
+	$('#branch_id').change(function(){
+		var branch_id=$(this).val();
+		
+		 $.ajax({
+				  url:'{{ route("get_classroom_by_branch_id") }}',
+				  type:'get',
+				  data:{
+					  'branch_id':branch_id
+				  },
+				  success:function(response)
+				  {
+					 var class_rooms=response['class_rooms'];				 
+					 var select_content='<option value="">Select Class Room</option>';
+					  for(i=0;i<class_rooms.length;i++)
+					  {
+						 var class_room_id=class_rooms[i].id;
+						 var class_room_name=class_rooms[i].class_room_name;
+						 select_content=select_content+'<option value="'+class_room_id+'">'+class_room_name+'</option>';
+					  }
+					  
+					  $('#paper_class_room').html(select_content);					  
+				  }
+			  });
+	});
+	$('#exam_type').change(function(){ 
+	          var type=$(this).val();
+			  if(type==2)
+			  {
+				  $('.jp_exam_end_date').hide();
+				  $('.jp_publish').hide();
+			  }
+			  if(type==1)
+			  {
+				  $('.jp_exam_end_date').show();
+				  $('.jp_publish').show();
+			  }
+	});
   </script>
 
 

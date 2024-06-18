@@ -388,9 +388,61 @@
                   </div>
                 </div>
               </div>
+			  <div class="card mb-4" id="filter_table">
+                <div class="card-body">
+				<form action="{{ route('assessment') }}" id="get_form" method="GET">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <label class="form-label">Branch</label>
+                      <select id="assessment_branch" name="branch_id" class="form-select">
+                        <option value="">Select Branch</option>
+						<?php foreach($branches as $branch) {?>
+                        <option <?php if(isset($_GET['branch_id']) && $_GET['branch_id']==$branch->id ) { echo 'selected'; } ?> value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
+                        <?php } ?>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4" id="classroom_assessment">
+                      <label class="form-label">Classroom</label>
+                      <select id="assessment_classroom" name="class_room_id" class="form-select">
+                        <option value="">Select Classroom</option>
+<?php if(isset($_GET['branch_id'])) {
+	$class_rooms=App\Models\ClassRooms::where('branch_id',$_GET['branch_id'])->get();
+	foreach($class_rooms as $class_room)
+	{
+		 if(isset($_GET['class_room_id']) && $_GET['class_room_id']==$class_room->id ) { $sel= 'selected'; } else { $sel= ''; }  
+		echo '<option '.$sel.' value="'.$class_room->id.'">'.$class_room->class_room_name.'</option>';
+	}
+}?>                        
+                      </select>
+                    </div>
+                    <!-- Group -->
+                    <div class="col-md-4" id="subject_assessment">
+                      <label class="form-label">Subject</label>
+                      <select id="assessment_subject" name="subject_id" class="form-select">
+                        <option value="">Select Subject</option> 
+<?php if(isset($_GET['branch_id'])) {
+	$subjects=App\Models\Subject::where('branch_id',$_GET['branch_id'])->get();
+	foreach($subjects as $subject)
+	{
+		if(isset($_GET['subject_id']) && $_GET['subject_id']==$subject->id ) { $sel= 'selected'; } else { $sel= ''; }  
+		echo '<option '.$sel.' value="'.$subject->id.'">'.$subject->subject_name.'</option>';
+	}
+}?>  						
+                      </select>
+                    </div>
+                  </div>
+				  </form>
+                </div>
+              </div>
               <!-- Assessment Lists -->
               <div class="card col-12" id="assessment_lists">
                 <div class="card-body table_admin text-nowrap">
+				@if(session()->has('message'))
+                                    <div class="alert alert-success">
+                                        {{ session()->get('message') }}
+                                    </div>
+                                    @endif
                   <table id="example" class="display" style="width:100%">
                     <thead>
                       <tr style="background-color: #f5c6cb30;">
@@ -405,20 +457,39 @@
                       </tr>
                     </thead>
                     <tbody>
+					<?php if($exams) { 
+					foreach($exams as $exam)
+					{
+					?>
                       <tr>
                         <td>
                           <span data-bs-toggle="modal" data-bs-target="#exam_preview">
-                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Question 1" style="cursor:pointer;">Exam 1</div>
+                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;">{{ $exam->exam_name }}</div>
                           </span>
                         </td>
-                        <td>Classroom 1</td>
-                        <td>Subject 1</td>
-                        <td>50/100</td>
-                        <td>1 hour</td>
-                        <td>30-05-2024</td>
+                        <td><?php
+						$class_room_id=$exam->class_room_id;
+						$class_room=App\Models\ClassRooms::find($class_room_id);
+						echo $class_room_name=$class_room->class_room_name;
+						?></td>
+                        <td><?php
+						$subject_id=$exam->subject_id;
+						$subject=App\Models\Subject::find($subject_id);
+						echo $subject_name=$subject->subject_name;
+						?></td>
+                        <td><?php echo $exam->passing_mark.'/'.$exam->total_marks; ?></td>
+                        <td><?php echo $exam->duration; ?></td>
+                        <td><?php echo $exam->exam_end_date; ?></td>
                         <td>
+						<?php 
+						$publish_status= $exam->publish_status;
+						if($publish_status==1)
+							$publish_status_str='Published';
+						else
+							$publish_status_str='Unpublished';
+						?>
                           <span class="badge bg-label-warning me-1" style="cursor: pointer;">
-                            <span  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unpublish">Unpublish</span>
+                            <span  data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $publish_status_str }}">{{ $publish_status_str }}</span>
                           </span>
                         </td>
                         <td>
@@ -431,34 +502,34 @@
                               <div class="modal-content">
                                 <div class="modal-header">
                                   <h5 class="modal-title mt-3" id="modalCenterTitle">
-                                          Exam 1
+                                         <?php echo $exam->exam_name; ?>
                                         </h5>
                                 </div>
                                 <div class="modal-body" style="text-align:left;">
                                   <div class="row mb-3 g-3">
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-first-name">Classroom</label>
-                                      <input type="text" class="form-control" value="Classroom 1" readonly />
+                                      <input type="text" class="form-control" value="<?php echo $class_room_name; ?>" readonly />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-first-name">Subject</label>
-                                      <input type="text" class="form-control" value="Subject 1" readonly />
+                                      <input type="text" class="form-control" value="<?php echo $subject_name; ?>" readonly />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-last-name">Total Marks</label>
-                                      <input type="text" class="form-control" value="100" readonly />
+                                      <input type="text" class="form-control" value="<?php echo $exam->total_marks; ?>" readonly />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                                      <input type="text" class="form-control" value="50" readonly />
+                                      <input type="text" class="form-control" value="<?php echo $exam->passing_mark; ?>" readonly />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="30-05-2024" class="form-control" readonly />
+                                      <input type="text" value="<?php echo $exam->exam_end_date; ?>" class="form-control" readonly />
                                     </div>
                                     <div class="col-md-6">
                                       <label for="bs-datepicker-format" class="form-label">Duration</label>
-                                      <input type="text" value="01:00:00" class="form-control" readonly />
+                                      <input type="text" value="<?php echo $exam->duration; ?>" class="form-control" readonly />
                                     </div>
                                   </div>
                                 </div>
@@ -470,91 +541,69 @@
                             </div>
                           </div>
                           </span>
-                          <span data-bs-toggle="modal" data-bs-target="#publish_question">
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" class="badge badge-center bg-success" style="cursor: pointer;" aria-label="Unpublish" data-bs-original-title="Unpublish">
-                              <i class="ti ti-share-off"></i>
-                            </span>
-                          <div class="modal fade" id="publish_question" tabindex="-1" aria-hidden="true" style="text-align: left;">
-                            <div class="modal-dialog modal-sm" role="document">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" id="modalCenterTitle" style="text-align: center;">
-                                      Exam 1
-                                    </h5>
-                                </div>
-                                <div class="modal-body">
-                                  <div class="row">
-                                    <div class="mb-3 col-md-12">
-                                      <label for="bs-rangepicker-single" class="form-label">Publish On</label>
-                                      <input type="text" class="form-control publishon_question" placeholder="DD-MM-YYYY HH:MM" id="flatpickr-datetime" />
-                                    </div>
-                                    <div class="mb-3 col-md-6">
-                                      <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="30-05-2024" class="form-control" />
-                                    </div>
-                                  </div>
-                                  <div class="divider">
-                                    <div class="divider-text">OR</div>
-                                  </div>
-                                  <div class="row">
-                                    <div class="col mb-2">
-                                      <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" id="publishnow_questionn">
-                                        <label class="form-check-label" for="publishnow_questionn">Publish Now</label>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
-                                    Close
-                                  </button>
-                                  <button type="button" id="logo_color" class="btn btn-primary btn_submit">Submit</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          </span>
+                          
 
-                          <span data-bs-toggle="modal" data-bs-target="#questionlist_edit">
+                          <span class="edit_exam" data-id="{{ $exam->id }}" data-exam-name="{{ $exam->exam_name }}" data-subject-name="{{ $subject_name }}" data-cls-name="{{ $class_room_name }}"data-bs-toggle="modal" data-bs-target="#questionlist_edit">
                             <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit" class="badge badge-center bg-warning" style="cursor: pointer;">
                               <i class="ti ti-edit"></i>
                             </span>
                           </span>
-                          <div class="modal fade" id="questionlist_edit" tabindex="-1" aria-hidden="true">
+                         
+<?php if($exam->type==1){ ?>
+                          <span>
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete"  data-id="{{ $exam->id }}" data-type="{{$exam->type}}" class="badge badge-center bg-danger toggle-class" style="cursor: pointer;">
+                              <i class="ti ti-trash"></i>
+                            </span>
+                          </span>
+<?php } ?>
+<?php if($exam->type==2){ ?>
+                          <span>
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Re Activate"  data-id="{{ $exam->id }}" data-type="{{$exam->type}}" class="badge badge-center bg-success toggle-class" style="cursor: pointer;">
+                              <i class="ti ti-trash"></i>
+                            </span>
+                          </span>
+<?php } ?>
+                        </td>
+                      </tr>
+					  <?php } }?>
+                  </table>
+				   <div class="modal fade" id="questionlist_edit" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-md" role="document">
                               <div class="modal-content">
                                 <div class="modal-header">
-                                  <h5 class="modal-title mt-3" id="modalCenterTitle">
-                                        Exam 1
+                                  <h5 class="modal-title mt-3 jp_exam_name" id="modalCenterTitle">
+                                        Exam Name
                                       </h5>
                                   <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
                                 </div>
+								<form action="{{ route('exam_update') }}" method="post">
+								@csrf
                                 <div class="modal-body" style="text-align:left;">
                                   <div class="row mb-3 g-3">
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-first-name">Classroom</label>
-                                      <input type="text" class="form-control" value="Classroom 1" />
+									  <input type="hidden" name="id" class="jp_exam_id">
+                                      <input type="text" readonly class="form-control jp_cls_name" value="Classroom 1" />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-first-name">Subject</label>
-                                      <input type="text" class="form-control" value="Subject 1" readonly />
+                                      <input type="text" readonly class="form-control jp_subj_name" value="Subject 1" readonly />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-last-name">Total Marks</label>
-                                      <input type="number" class="form-control" value="100" />
+                                      <input type="number" class="form-control" id="total_marks" name="total_marks" value="" />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                                      <input type="number" class="form-control" value="50" />
+                                      <input type="number" class="form-control" id="passing_mark" name="passing_mark" value="50" />
                                     </div>
                                     <div class="col-md-6">
                                       <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="30-05-2024" class="form-control" />
+                                      <input type="text" value="30-05-2024" id="flatpickr-date1" name="exam_end_date" class="exam_end_date form-control" />
                                     </div>
                                     <div class="col-md-6">
                                       <label for="bs-datepicker-format" class="form-label">Duration</label>
-                                      <input type="text" id="timepicker-format" value="01:00:00" class="form-control" />
+                                      <input type="text" id="timepicker-format" value="01:00:00" name="duration" class="duration form-control" />
                                     </div>
                                   </div>
                                 </div>
@@ -562,957 +611,82 @@
                                   <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
                                   <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
                                 </div>
+								</form>
                               </div>
                             </div>
                           </div>
 
-                          <span>
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete" class="badge badge-center bg-danger" style="cursor: pointer;">
-                              <i class="ti ti-trash"></i>
-                            </span>
-                          </span>
-                        </td>
-                      </tr>
-                  </table>
+				   <!-- Active -->
+                                        <div class="modal fade" id="org_suspend" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="modalCenterTitle">Activate <span class="name"></span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form action="{{route('change_exam_status')}}" method="POST">
+                                                        @csrf
+                                                        <div class="modal-body">
+                                                            <div class="row">
+                                                                <div class="col mb-3">
+                                                                    <span>Are you sure, you want to activate <b class="name">Exam</b></span>
+                                                                    <input type="hidden" id="status_active" name="status" value="1" />
+                                                                    <input type="hidden" id="id_active" name="id" />
+                                                                    <input type="hidden" id="suspend_msg" name="suspend_msg" value="" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
+                                                                No
+                                                            </button>
+                                                            <button type="submit" id="logo_color" class="btn btn-primary">Yes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Suspend -->
+
+                                        <div class="modal fade" id="org_active" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="modalCenterTitle">Delete <span class="name"></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form action="{{route('change_exam_status')}}" method="POST">
+                                                        @csrf
+                                                        <div class="modal-body">
+                                                            <div class="row">
+                                                                <div class="col mb-3">
+                                                                    <label for="nameWithTitle" class="form-label">Reason</label>
+                                                                    <textarea id="nameWithTitle" name="suspend_msg" required class="form-control" placeholder="Enter Reason"></textarea>
+                                                                    <input type="hidden" id="status" name="status" value="2" />
+                                                                    <input type="hidden" id="id" name="id" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
+                                                                Close
+                                                            </button>
+                                                            <button type="submit" id="logo_color" class="btn btn-primary">Delete</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                
+                            
                 </div>
               </div>
 
-              <!-- Question Bank Creation -->
-              <div class="nav-align-top mb-4" id="questionbank_creation">
-                <ul class="nav nav-pills mb-3 nav-fill" role="tablist">
-                  <li class="nav-item">
-                    <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-justified-question-bank" aria-controls="navs-pills-justified-question-bank" aria-selected="true">
-                      <i class="tf-icons ti ti-adjustments-question ti-xs me-1"></i> Question Bank
-                    </button>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{{ route('question_bank','add_question')}}" class="nav-link">
-                      <i class="tf-icons ti ti-new-section ti-xs me-1"></i> Add Questions
-                    </a>
-                  </li>
-                </ul>
-                <div class="tab-content">
-                  <div class="tab-pane fade show active" id="navs-pills-justified-question-bank" role="tabpanel">
-                    <div class="row">
-                      <div class="col-4 mb-3" id="questionbank_subject_div">
-                        <label for="selectpickerBasic" class="form-label">Subject</label>
-                        <select id="questionbank_sub_ject" class="selectpicker w-100" data-style="btn-default">
-                          <option value="">Select Subject</option>
-                          <option value="class_1">Subject 1</option>
-                          <option value="class_2">Subject 2</option>
-                        </select>
-                      </div>
-                      <div class="col-4 mb-3" id="questionbank_lesson_div">
-                        <label for="selectpickerBasic" class="form-label">Lesson</label>
-                        <select id="questionbank_sub_lesson" class="selectpicker w-100" data-style="btn-default">
-                          <option value="">Select Lesson</option>
-                          <option value="class_1">Lesson 1</option>
-                          <option value="class_2">Lesson 2</option>
-                        </select>
-                      </div>
-                      <div class="col-4 mb-3" id="questionbank_difficulty_div">
-                        <label for="selectpickerBasic" class="form-label">Difficulty Level</label>
-                        <select id="questionbank_difficultylevel" class="selectpicker w-100" data-style="btn-default">
-                          <option value="">Select Difficulty Level</option>
-                          <option value="class_1">Easy</option>
-                          <option value="class_2">Medium</option>
-                          <option value="class_2">Hard</option>
-                        </select>
-                      </div>
-                      <div class="col-5 mb-3" id="questionbank_type_div">
-                        <label for="selectpickerBasic" class="form-label">Filter by Type</label>
-                        <select id="questionbank_filter_type" class="selectpicker w-100 filter_by_type" data-style="btn-default">
-                          <option value="">Select Questions</option>
-                          <option value="mcq_1">Multiple Choice Single Answer</option>
-                          <option value="mcq_2">Multiple Choice Multiple Answers</option>
-                          <option value="match_following">Match the Following</option>
-                          <option value="fill_blanks">Fill in the blanks</option>
-                          <option value="true_false">True or False</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="order_sequence">Order/Sequencing</option>
-                        </select>
-                      </div>
-                    </div>
-                    <hr/>
-                    <div id="questionbank_list" class="table_admin">
-                      <table id="question_bank_list" class="display" style="width:100%">
-                        <thead>
-                          <tr style="background-color: #f5c6cb30;">
-                            <th>Question</th>
-                            <th>Difficulty Level</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>
-                              <span data-bs-toggle="modal" data-bs-target="#questionbank_preview">
-                                <div class="word_ellipsis" id="question_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Question 1" style="cursor:pointer;">Question 1</div>
-                              </span>
-                            </td>
-                            <td>Easy</td>
-                            <td>
-                              <span data-bs-toggle="modal" data-bs-target="#questionbank_preview">
-                                <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit" class="badge badge-center bg-warning" style="cursor: pointer;">
-                                  <i class="ti ti-edit"></i>
-                                </span>
-                              </span>
-
-                              <div class="modal fade" id="questionbank_preview" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                                  <div class="modal-content">
-                                    <div class="modal-header">
-                                      <h5 class="modal-title mt-3" id="modalCenterTitle">
-                                        Question 1
-                                      </h5>
-                                      <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
-                                    </div>
-                                    <div class="modal-body">
-                                      <div class="row">
-                                        <div class="mb-3 col-lg-8 col-xl-7 col-12 mb-0">
-                                          <label class="form-label">Question<span class="text-danger">*</span></label>
-                                          <textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
-                                        </div>
-                                        <div class="mb-3 col-lg-4 col-xl-5 col-12 mb-0">
-                                          <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                          <div class="input-group form-check-inline mb-1">
-                                            <div class="input-group-text">
-                                              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option1">
-                                            </div>
-                                            <input type="text" class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox">
-                                          </div>
-                                          <div class="input-group  form-check-inline mb-1">
-                                            <div class="input-group-text">
-                                              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option2">
-                                            </div>
-                                            <input type="text" class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox">
-                                          </div>
-                                          <div class="input-group  form-check-inline mb-1">
-                                            <div class="input-group-text">
-                                              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option3">
-                                            </div>
-                                            <input type="text" class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox">
-                                          </div>
-                                          <div class="input-group  form-check-inline mb-3">
-                                            <div class="input-group-text">
-                                              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option4">
-                                            </div>
-                                            <input type="text" class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox">
-                                          </div>
-                                          <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                          <select id="smallSelect" class="form-select form-select-sm">
-                                            <option>Select</option>
-                                            <option value="1">Easy</option>
-                                            <option value="2">Medium</option>
-                                            <option value="3">Hard</option>
-                                          </select>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                      <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
-                                      <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <span>
-                                <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete" class="badge badge-center bg-danger" style="cursor: pointer;">
-                                  <i class="ti ti-trash"></i>
-                                </span>
-                              </span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="tab-pane fade" id="navs-pills-justified-add-questions" role="tabpanel">
-                    <div class="row mb-4">
-                      <!-- <div class="col-5 mb-3" id="classroom_div">
-                        <label for="selectpickerBasic" class="form-label">Classroom</label>
-                        <select id="class_room" class="selectpicker w-100" data-style="btn-default">
-                          <option value="">Select Classroom</option>
-                          <option value="class_1">Classroom 1</option>
-                          <option value="class_2">Classroom 2</option>
-                        </select>
-                      </div>
-                      <div class="col-1 mb-3"></div> -->
-                      <div class="col-5 mb-3" id="subject_div">
-                        <label for="selectpickerBasic" class="form-label">Subject</label>
-                        <select id="sub_ject" class="selectpicker w-100" data-style="btn-default">
-                          <option value="">Select Subject</option>
-                          <?php if($subjects) {
-							  foreach($subjects as $subject)
-							  {?>
-								<option value="{{$subject->id}}">{{ $subject->subject_name }}</option>
-							  <?php }
-						  } ?>
-                        </select>
-                      </div>
-                      <div class="col-5 mb-3" id="lesson_div">
-                        <label for="selectpickerBasic" class="form-label">Lesson</label>
-                        <select id="sub_lesson" class="selectpicker w-100" data-style="btn-default">
-                          <option value="">Select Lesson</option>
-                          <option value="class_1">Lesson 1</option>
-                          <option value="class_2">Lesson 2</option>
-                        </select>
-                      </div>
-                      <div class="col-2 mb-3"></div>
-                      <div class="col-5 mb-3" id="type_div">
-                        <label for="selectpickerBasic" class="form-label">Filter by Type</label>
-                        <select id="filter_type" class="selectpicker w-100 filter_by_type" data-style="btn-default">
-                          <option value="">Select Questions</option>
-                          <option value="mcq_1">Multiple Choice Single Answer</option>
-                          <option value="mcq_2">Multiple Choice Multiple Answers</option>
-                          <option value="match_following">Match the Following</option>
-                          <option value="fill_blanks">Fill in the blanks</option>
-                          <option value="true_false">True or False</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="order_sequence">Order/Sequencing</option>
-                        </select>
-                      </div>
-                    </div>
-                    <hr/>
-                    <div class="nav-align-top mb-4 main_div" id="main_div">
-                      <ul class="nav nav-pills mb-3 nav-fill" role="tablist">
-                        <li class="nav-item">
-                          <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-justified-manual" aria-controls="navs-pills-justified-manual" aria-selected="true">
-                            <b> <i class="tf-icons ti ti-chart-candle ti-xs me-1"></i> Manual Creation</b>
-                          </button>
-                        </li>
-                        <li class="nav-item">
-                          <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-justified-excel" aria-controls="navs-pills-justified-excel" aria-selected="false">
-                            <b> <i class="tf-icons ti ti-file-spreadsheet ti-xs me-1"></i> Excel Upload</b>
-                          </button>
-                        </li>
-                      </ul>
-                      <div class="tab-content">
-                        <div class="tab-pane fade show active" id="navs-pills-justified-manual" role="tabpanel">
-                          <div class="row mb-4">
-                            <div class="col-12">
-                              <!-- <div class="card">
-                                <div class="card-body"> -->
-                              <!-- Multiple Choice Single Answer -->
-                              <form id="single_answer" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
-                                        <label class="form-label">Question<span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                        <div class="input-group form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option1">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option3">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-3">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option4">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-
-                              <!-- Multiple Choice Multiple Answers -->
-                              <form id="multiple_answer" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
-                                        <label class="form-label">Question<span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                        <div class="input-group mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input" />
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox" />
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input" />
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox" />
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input" />
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox" />
-                                        </div>
-                                        <div class="input-group mb-3">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input" />
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox" />
-                                        </div>
-                                        <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-
-                              <!-- Fill in the blanks -->
-                              <form id="fill_blanks" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
-                                        <label class="form-label">Question<span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                        <div class="input-group form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option1">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (A)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (B)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option3">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (C)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-3">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_Options" id="inline_Radio" value="option4">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="Choice (D)" aria-label="Text input with checkbox">
-                                        </div>
-                                        <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-
-                              <!-- True or False -->
-                              <form id="true_false" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
-                                        <label class="form-label">Question<span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="6"></textarea>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                        <div class="input-group form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_trueOptions" id="inline_trueRadio" value="option1">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="True" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-3">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_trueOptions" id="inline_trueRadio" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="False" aria-label="Text input with checkbox">
-                                        </div>
-                                        <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-
-                              <!-- True or False -->
-                              <form id="short_answer" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-7 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Question<span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="4"></textarea>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Answer<span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="shortanswer" rows="4"></textarea>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
-                                        <br>
-                                        <br>
-                                        <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-
-                              <!-- Match the Following -->
-                              <form id="match_following" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-3 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Heading 1<span class="text-danger">*</span></label>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">A</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="Child Labour (Prohibition and Regulation) Act Year of Legislation" row="10"></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">B</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="The Factories Act" row="10"></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">C</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="The Mines Act" row="10"></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">D</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="The Right of Children to Free and Compulsory Education Act" row="10"></textarea>
-                                        </div>
-                                      </div>
-                                      <div class="mb-3 col-lg-3 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Heading 2<span class="text-danger">*</span></label>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">1</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="1986" row="10"></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">2</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="1952" row="10"></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">3</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="2009" row="10"></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">4</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="1948" row="10"></textarea>
-                                        </div>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
-                                        <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                        <div class="input-group form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions_match" id="inlineRadio_match" value="option1">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="A-1, B-4, C-2, D-3" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions_match" id="inlineRadio_match" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="A-2, B-4, C-3, D-1" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions_match" id="inlineRadio_match" value="option3">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="A-3, B-2, C-1, D-4" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-4">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions_match" id="inlineRadio_match" value="option4">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="A-4, B-3, C-1, D-2" aria-label="Text input with checkbox">
-                                        </div>
-                                        <label for="defaultSelect" class="form-label">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-
-                              <!-- Ordering/Sequences -->
-                              <form id="order_sequence" method="POST" action="">
-                                <div class="group-a">
-                                  <div class="group-b">
-                                    <div class="row">
-                                      <div class="mb-3 col-lg-7 col-xl-6 col-12 mb-0">
-                                        <label class="form-label">Question<span class="text-danger">*</span></label>
-                                        <textarea class="form-control mb-2" id="order_sequenceTextarea1" rows="3" placeholder="Arrange the following steps in the correct order in which they appear in the process of adaptation."></textarea>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">A</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="You gradually feel better and decrease sweating."></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">B</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="Sudden increase in the temperature of the environment."></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">C</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="Eventually you stop sweating and then feel completely normal."></textarea>
-                                        </div>
-                                        <div class="input-group mb-1">
-                                          <span class="input-group-text">D</span>
-                                          <textarea class="form-control" aria-label="With textarea" placeholder="You feel very hot and start sweating."></textarea>
-                                        </div>
-                                      </div>
-                                      <div class="mb-3 col-lg-4 col-xl-4 col-12 mb-0">
-                                        <label class="form-label">Choices<span class="text-danger">*</span></label>
-                                        <div class="input-group form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option1">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="A,B,C,D" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="B,C,D,A" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-1">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="B,D,A,C" aria-label="Text input with checkbox">
-                                        </div>
-                                        <div class="input-group  form-check-inline mb-4">
-                                          <div class="input-group-text">
-                                            <input class="form-check-input" type="radio" name="inlineRadio_orderOptions" id="inline_orderRadio" value="option2">
-                                          </div>
-                                          <input type="text" class="form-control" placeholder="B,D,C,A" aria-label="Text input with checkbox">
-                                        </div>
-                                        <label for="defaultSelect" class="form-label mt-4">Difficulty Level</label>
-                                        <select id="smallSelect" class="form-select form-select-sm">
-                                          <option>Select</option>
-                                          <option value="1">Easy</option>
-                                          <option value="2">Medium</option>
-                                          <option value="3">Hard</option>
-                                        </select>
-                                      </div>
-                                      <div class="mb-3 col-lg-12 col-xl-1 col-12 d-flex align-items-center mb-0">
-                                        <br><a href="javascript:void(0);" class="remove_button" style="pointer-events: none;cursor: default;"><i class="fa-solid fa-circle-minus"></i></a>
-                                      </div>
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="mb-0">
-                                  <button type="button" id="logo_color" class="add_button btn btn-primary" style="float: right;">
-                                    <i class="ti ti-plus me-1"></i>
-                                    <span class="align-middle">Add</span>
-                                  </button>
-                                </div>
-                                <p style="height:4px;"></p>
-                                <div class="mt-2">
-                                  <button type="submit" class="btn btn-primary me-2" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn bg-label-danger">Cancel</button>
-                                </div>
-                              </form>
-                              <!-- </div>
-                              </div> -->
-                            </div>
-                          </div>
-                        </div>
-                        <div class="tab-pane fade" id="navs-pills-justified-excel" role="tabpanel">
-                          <div class="row">
-                            <div class="mb-3 col-md-6">
-                              <div class="col-md-12" id="upload_btn">
-                                <label for="formFile" class="form-label">Assessment Upload</label>
-                                <input class="form-control" id="csvFileInput" name="file" type="file" required />
-                              </div>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                              <br>
-                              <span type="button" class="btn btn-label-primary waves-effect" id="downloadButton" style="float: right;">
-                                    <span class="ti-xs ti ti-download me-1"></span>Download Sample File</span>
-                            </div>
-                            <div class="col-md-12 mt-4" id="btn_submit">
-                              <button type="submit" class="btn btn-primary me-2" id="logo_color" style="float:right;">Submit</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+             
 
               <!-- Question Paper Creation -->
-              <div class="card mb-4" id="questionpaper_creation">
-                <h5 id="pagetitle" class="p-3 mb-0">Create a Exam</h5>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-4 mb-3">
-                      <label for="selectpickerBasic" class="form-label">Classroom</label>
-                      <select id="paper_class_room" class="selectpicker w-100" data-style="btn-default">
-                        <option value="">Select Classroom</option>
-                        <option value="class_1">Classroom 1</option>
-                        <option value="class_2">Classroom 2</option>
-                      </select>
-                    </div>
-                    <div class="col-4 mb-3" id="paper_subject_div">
-                      <label for="selectpickerBasic" class="form-label">Subject</label>
-                      <select id="paper_sub_ject" class="selectpicker w-100" data-style="btn-default">
-                        <option value="">Select Subject</option>
-                        <option value="class_1">Subject 1</option>
-                        <option value="class_2">Subject 2</option>
-                      </select>
-                    </div>
-                    <div class="col-4 mb-3" id="paper_lesson_div">
-                      <label for="selectpickerBasic" class="form-label">Lesson</label>
-                      <br>
-                      <button class="btn btn-success dropdown-toggle w-100" type="button" id="multiSelectDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="text-align: left; float: left; display: block !important; background: transparent !important; border: 1px solid #dbdade !important; color: #777485 !important; box-shadow: none !important; border-radius: 0.375rem !important;">
-                        Select
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="multiSelectDropdown" id="paper_sub_lesson" style="padding: 12px;">
-                        <li class="mb-1">
-                          <label>
-                            <input type="checkbox" class="chkPassport" value="1"> Lesson 1
-                          </label>
-                        </li>
-                        <li class="mb-1">
-                          <label>
-                            <input type="checkbox" class="chkPassport" value="2"> Lesson 2
-                          </label>
-                        </li>
-                        <li class="mb-1">
-                          <label>
-                            <input type="checkbox" class="chkPassport" value="3"> Lesson 3
-                          </label>
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="col-12 mb-3" id="paper_type_div">
-                      <label for="selectpickerBasic" class="form-label">Filter by Type</label>
-                      <div class="optionBox">
-                        <div class="block mb-2">
-                          <div class="d-flex">
-                            <div class="row">
-                              <div class="col-3">
-                                <select id="smallSelect" class="form-select form-select-sm">
-                                  <option value="">Select Lesson</option>
-                                  <option value="lesson_1">Lesson 1</option>
-                                  <option value="lesson_2">Lesson 2</option>
-                                  <option value="lesson_3">Lesson 3</option>
-                                  <option value="lesson_4">Lesson 4</option>
-                                </select>
-                              </div>
-                              <div class="col-3">
-                                <select id="smallSelect" class="form-select form-select-sm">
-                                  <option value="">Questions Type</option>
-                                  <option value="mcq_1">Multiple Choice Single Answer</option>
-                                  <option value="mcq_2">Multiple Choice Multiple Answers</option>
-                                  <option value="match_following">Match the Following</option>
-                                  <option value="fill_blanks">Fill in the blanks</option>
-                                  <option value="true_false">True or False</option>
-                                  <option value="short_answer">Short Answer</option>
-                                  <option value="order_sequence">Order/Sequencing</option>
-                                </select>
-                              </div>
-                              <div class="col-3">
-                                <select id="smallSelect" class="form-select form-select-sm">
-                                  <option value="">Difficulty Level</option>
-                                  <option value="easy">Easy</option>
-                                  <option value="medium">Medium</option>
-                                  <option value="hard">Hard</option>
-                                </select>
-                              </div>
-                              <div class="col-2">
-                                <input type="text" class="form-control form-control-sm" id="defaultFormControlInput" placeholder="No.Of Questions" aria-describedby="defaultFormControlHelp">
-                              </div>
-                              <div class="col-1">
-                                <span class="badge badge-center rounded-pill bg-label-danger remove" style="position: relative;top: 4px;pointer-events: none;cursor: default;"><i class="ti ti-minus"></i></span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="block">
-                          <span class="badge rounded-pill bg-label-success add"><i class="ti ti-plus ti-sm" style="font-size: 11px !important;"></i>&nbsp;Add Option</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-2" id="form_submit">
-                    <button type="submit" class="btn btn-primary waves-effect waves-light" id="logo_color">Show</button>
-                  </div>
-                </div>
-              </div>
-              <div class="card" id="question_paper">
-                <div class="card-body">
-                  <h5 id="pagetitle">Multiple Choice Single Answer</h5>
-                  <div class="row">
-                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
-                      <br>
-                      <br>
-                      <br>
-                      <br>
-                      <span class="badge badge-center bg-label-dark">1</span>
-                    </div>
-                    <div class="mb-3 col-lg-7 col-xl-5 col-12 mb-0">
-                      <label class="form-label">Question<span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="question_8" rows="7"></textarea>
-                    </div>
-                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
-                      <label class="form-label">Choices<span class="text-danger">*</span></label>
-                      <div class="input-group form-check-inline mb-1">
-                        <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option1">
-                        </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (A)" aria-label="Text input with checkbox">
-                      </div>
-                      <div class="input-group  form-check-inline mb-1">
-                        <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option2">
-                        </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (B)" aria-label="Text input with checkbox">
-                      </div>
-                      <div class="input-group  form-check-inline mb-1">
-                        <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option3">
-                        </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (C)" aria-label="Text input with checkbox">
-                      </div>
-                      <div class="input-group  form-check-inline mb-1">
-                        <div class="input-group-text">
-                          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio" value="option4">
-                        </div>
-                        <input type="text" class="form-control answer_8" placeholder="Choice (D)" aria-label="Text input with checkbox">
-                      </div>
-                    </div>
-                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
-                      <br>
-                      <br>
-                      <br>
-                      <br>
-                      <button type="button" class="btn btn-sm btn-label-linkedin waves-effect" id="refetch_btn">
-                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
-                      </button>
-                    </div>
-                    <hr />
-                  </div>
-                  <h5 id="pagetitle">Short Answer</h5>
-                  <div class="row">
-                    <div class="mb-3 col-lg-12 col-xl-1 col-12 align-items-center mb-0" style="text-align: center;">
-                      <br>
-                      <br>
-                      <br>
-                      <br>
-                      <span class="badge badge-center bg-label-dark">2</span>
-                    </div>
-                    <div class="mb-3 col-lg-7 col-xl-5 col-12 mb-0">
-                      <label class="form-label">Question<span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="exampleFormControlTextarea1" rows="7"></textarea>
-                    </div>
-                    <div class="mb-3 col-lg-4 col-xl-3 col-12 mb-0">
-                      <label class="form-label">Answer<span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="shortanswer" rows="7"></textarea>
-                    </div>
-                    <div class="mb-3 col-lg-12 col-xl-2 col-12 align-items-center mb-0">
-                      <br>
-                      <br>
-                      <br>
-                      <br>
-                      <button type="button" class="btn btn-sm btn-label-linkedin waves-effect">
-                        <i class="tf-icons ti ti-rotate-rectangle ti-xs me-1"></i> Refetch
-                      </button>
-                    </div>
-                    <hr />
-                  </div>
-                </div>
-              </div>
-              <div class="card" id="exam_creation">
-                <form class="card-body">
-                  <div class="row mb-3 g-3">
-                    <div class="col-md-6">
-                      <label class="form-label" for="multicol-first-name">Exam Name</label>
-                      <input type="text" class="form-control" placeholder="Weekly Exam" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label" for="multicol-last-name">Total Marks</label>
-                      <input type="number" class="form-control" placeholder="100" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                      <input type="number" class="form-control" placeholder="50" />
-                    </div>
-                    <div class="col-md-6">
-                      <label for="bs-datepicker-format" class="form-label">Duration</label>
-                      <input type="text" id="timepicker-format" placeholder="HH:MM:SS" class="form-control" />
-                    </div>
-
-                    <div class="mb-3 col-md-6">
-                      <label class="form-label">Exam End Date</label>
-                      <input type="text" value="30-05-2024" class="form-control" />
-                    </div>
-                    <div class="mb-3 col-md-6"></div>
-
-                    <div class="col-md-4">
-                      <label for="bs-rangepicker-single" class="form-label">Publish On</label>
-                      <input type="text" class="form-control publish_on" placeholder="DD-MM-YYYY HH:MM" id="flatpickr-datetime" />
-                    </div>
-                    <div class="col-md-1" style="top: 14px;position: relative;">
-                      <div class="divider divider-vertical divider-danger">
-                        <div class="divider-text">OR</div>
-                      </div>
-                    </div>
-                    <div class="col-md-3" style="top: 33px;position: relative;">
-                      <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" id="chkPassport1">
-                        <label class="form-check-label" for="chkPassport1">Publish Now</label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pt-4">
-                    <button type="submit" class="btn btn-primary me-sm-3 me-1" id="logo_color">Submit</button>
-                    <button type="reset" class="btn btn-label-danger">Cancel</button>
-                  </div>
-                </form>
-              </div>
             </div>
             <div class="pt-4" style="float: right;">
               <button type="button" class="btn-label-secondary waves-effect previous_button me-3" id="previous_button" style="border-color:transparent !important;background: #eaebec !important; color: #a8aaae !important;">Previous</button>
@@ -1545,7 +719,45 @@
   <script src="{{asset('assets/jquery-timepicker/jquery-timepicker.js')}}"></script>
   <script src="{{asset('assets/flatpickr/flatpickr.js')}}"></script>
   <script src="{{asset('assets/bootstrap-select/bootstrap-select.js')}}"></script>
+<script>
+    $(function() {
+      
+ 
+      $('#assessment_branch').change(function() {
+			$('#get_form').submit();      
+          
+			  
+            $('#classroom_assessment').show();
+            $('#subject_assessment').show();
+            $('#assessment_lists').show();
+          
 
+       
+      });
+	  $('#assessment_classroom').change(function() {
+			$('#get_form').submit();      
+          
+			  
+            $('#classroom_assessment').show();
+            $('#subject_assessment').show();
+            $('#assessment_lists').show();
+          
+
+       
+      });
+$('#assessment_subject').change(function() {
+			$('#get_form').submit();      
+          
+			  
+            $('#classroom_assessment').show();
+            $('#subject_assessment').show();
+            $('#assessment_lists').show();
+          
+
+       
+      });
+    });
+  </script>
   <script type="text/javascript">
     $("#chkPassport1").change(function() {
       if (this.checked) {
@@ -2149,7 +1361,52 @@
       scrollX: true
     });
   </script>
+    <script>
+        $(function() {
+            // $('#suspend').on("click",function() {
+            $("#example").on("click", ".toggle-class", function() {
 
+                if ($(this).data('type') == 1) {
+                    var exam_id = $(this).data('id');
+                    $("#id").val(exam_id);
+                    //$(".name").html($(this).data('name'));
+                    $("#org_active").modal('show');
+                } else if ($(this).data('type') == 2) {
+                    var exam_id = $(this).data('id');
+                    $("#id_active").val(exam_id);
+                    //$(".name").html($(this).data('name'));
+                    $("#org_suspend").modal('show');
+                }
+            });
+			$('.edit_exam').click(function(){
+				
+				var id=$(this).attr('data-id');
+				var exam_name=$(this).attr('data-exam-name');
+				var class_name=$(this).attr('data-cls-name');
+				var subj_name=$(this).attr('data-subject-name');
+				$.ajax({
+                url: '{{ route("get_exam_by_exam_id") }}',
+                type: 'GET',
+                data: {
+                    'id': id,
+                },
+                success: function(response) {
+                    var exam = response['exam'];
+					$('.jp_exam_name').html(exam_name);
+					$('.jp_cls_name').val(class_name);
+					$('.jp_subj_name').val(subj_name);
+					$('.jp_exam_id').val(exam.id);
+					$('#total_marks').val(exam.total_marks);
+					$('#passing_mark').val(exam.passing_mark);
+					$('.exam_end_date').val(exam.exam_end_date);
+					$('.duration').val(exam.duration);
+                    console.log(exam.id);
+                    
+                }
+            });
+			});
+        });
+    </script>
 
 </body>
 
