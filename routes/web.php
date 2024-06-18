@@ -352,8 +352,14 @@ Route::controller(AssessmentController::class)->prefix('admin/')->middleware('is
     Route::post('edit_question_type_two','edit_question_type_two')->name('edit_question_type_two');
     Route::post('suspend_question_type_two','suspend_question_type_two')->name('suspend_question_type_two');
 
+    Route::post('edit_question_type_three','edit_question_type_three')->name('edit_question_type_three');
+    Route::post('suspend_question_type_three','suspend_question_type_three')->name('suspend_question_type_three');
+
     Route::post('edit_question_type_four','edit_question_type_four')->name('edit_question_type_four');
     Route::post('suspend_question_type_four','suspend_question_type_four')->name('suspend_question_type_four');
+
+    Route::post('edit_question_type_five','edit_question_type_five')->name('edit_question_type_five');
+    Route::post('suspend_question_type_five','suspend_question_type_five')->name('suspend_question_type_five');
 });
 Route::controller(DashboardController::class)->prefix('admin/')->middleware('isLoggedIn')->group(function () {
     Route::get('my_profile','my_profile')->name('my_profile_admin');
