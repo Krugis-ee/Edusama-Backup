@@ -289,6 +289,8 @@ Route::controller(StudentDashboardController::class)->prefix('student')->middlew
     Route::get('student_assignment','student_assignment')->name('student_assignment');
     Route::get('assignment_download_status','assignment_download_status')->name('assignment_download_status');
     Route::post('answer_upload_status','answer_upload_status')->name('answer_upload_status');
+	Route::get('assessment','assessment')->name('student_assessment');
+	Route::get('exam_screen/{id}','exam_screen')->name('student_exam_screen');
 });
 //Teacher Dashboard
 Route::get('teacher', [TeacherDashboardController::class, 'dashboard'])->middleware('isLoggedIn')->name('teacher_dashboard');
@@ -335,7 +337,14 @@ Route::controller(AssessmentController::class)->prefix('admin/')->middleware('is
 	Route::get('get_lessons_by_subjects_id','get_lessons_by_subjects_id')->name('get_lessons_by_subjects_id');
 	Route::get('get_subjects_by_branch_id','get_subjects_by_branch_id')->name('get_subjects_by_branch_id');
 	Route::post('add_question_manual_creation','add_question_manual_creation')->name('add_question_manual_creation');
-    
+    Route::post('fetch_question','fetch_question')->name('fetch_question');
+	Route::post('exam_questions_add','exam_questions_add')->name('exam_questions_add');
+	Route::post('exam_details_update','exam_details_update')->name('exam_details_update');
+	Route::post('exam_update','exam_update')->name('exam_update');
+	Route::post('change_exam_status', 'change_exam_status')->name('change_exam_status');
+	Route::get('get_exam_by_exam_id','get_exam_by_exam_id')->name('get_exam_by_exam_id');
+	Route::get('get_classroom_by_branch_id','get_classroom_by_branch_id')->name('get_classroom_by_branch_id');
+	
     Route::get('list_question_','list_question')->name('list_question');
     Route::post('edit_question_type_one','edit_question_type_one')->name('edit_question_type_one');
     Route::post('suspend_question_type_one','suspend_question_type_one')->name('suspend_question_type_one');
@@ -343,14 +352,8 @@ Route::controller(AssessmentController::class)->prefix('admin/')->middleware('is
     Route::post('edit_question_type_two','edit_question_type_two')->name('edit_question_type_two');
     Route::post('suspend_question_type_two','suspend_question_type_two')->name('suspend_question_type_two');
 
-    Route::post('edit_question_type_three','edit_question_type_three')->name('edit_question_type_three');
-    Route::post('suspend_question_type_three','suspend_question_type_three')->name('suspend_question_type_three');
-
     Route::post('edit_question_type_four','edit_question_type_four')->name('edit_question_type_four');
     Route::post('suspend_question_type_four','suspend_question_type_four')->name('suspend_question_type_four');
-
-    Route::post('edit_question_type_five','edit_question_type_five')->name('edit_question_type_five');
-    Route::post('suspend_question_type_five','suspend_question_type_five')->name('suspend_question_type_five');
 });
 Route::controller(DashboardController::class)->prefix('admin/')->middleware('isLoggedIn')->group(function () {
     Route::get('my_profile','my_profile')->name('my_profile_admin');
