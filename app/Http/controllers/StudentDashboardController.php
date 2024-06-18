@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ClassRoomTimings;
 use App\Models\ClassRooms;
 use App\Models\User;
+use App\Models\Exam;
 use App\Models\Country;
 use App\Models\Assignment;
 use App\Models\AssignmentProgress;
@@ -20,6 +21,26 @@ class StudentDashboardController extends Controller
     {
         return view('student_dashboard.home');
     }
+	public function assessment()
+	{
+		$user_id = session()->get('loginId');
+		$class_rooms = DB::table('class_room_subject_teachers')
+    ->whereRaw('FIND_IN_SET('.$user_id.', students_id)')
+	->select('class_room_id')
+	->groupBy('class_room_id')
+    ->get();
+	$cls_room_ids=[];
+	foreach ($class_rooms as $class_room) {	
+      array_push($cls_room_ids,$class_room->class_room_id);
+	}
+	$exams=Exam::whereIn('class_room_id',$cls_room_ids)->get();
+	return view('student_dashboard.assessment',['exams'=>$exams]);
+	}
+	public function exam_screen($id)
+	{
+		$exam=Exam::find($id);
+		return view('student_dashboard.exam_screen',['exam'=>$exam]);
+	}
     public function online_class()
     {
 		$user_id = session()->get('loginId');
