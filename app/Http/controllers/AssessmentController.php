@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Exam;
+use App\Models\ExamQuestionType;
+use App\Models\ExamQuestions;
 use App\Models\Organization;
 use App\Models\Country;
 use App\Models\UserRole;
@@ -52,7 +55,22 @@ class AssessmentController extends Controller
 		else{
 			$subjects=Subject::where('type',1)->where('organization_id',1)->get();
 		}
-        return view('assessment.admin_assessment',['subjects'=>$subjects]);
+		$user_id = session()->get('loginId');
+        $org_id = User::getOrganizationId($user_id);
+        //$branch_id = User::getBranchID($user_id);
+        $branches=Branch::where('organization_id',$org_id)->get();
+		
+		$exams=[];
+		if(!empty($_GET['branch_id']))
+		$exams=Exam::where('branch_id',$_GET['branch_id'])->get();
+		
+		if( !empty($_GET['branch_id']) && !empty($_GET['class_room_id']) )
+		$exams=Exam::where('branch_id',$_GET['branch_id'])->where('class_room_id',$_GET['class_room_id'])->get();
+        
+		if( !empty($_GET['branch_id']) && !empty($_GET['class_room_id']) && !empty($_GET['subject_id']) )
+		$exams=Exam::where('branch_id',$_GET['branch_id'])->where('class_room_id',$_GET['class_room_id'])->where('subject_id',$_GET['subject_id'])->get();
+        
+		return view('assessment.admin_assessment',['subjects'=>$subjects,'exams'=>$exams,'branches'=>$branches]);
     }
 	public function question_bank($slug)
 	{
@@ -894,14 +912,177 @@ class AssessmentController extends Controller
     {
 		$user_id = session()->get('loginId');
         $org_id = User::getOrganizationId($user_id);
-        $branch_id = User::getBranchID($user_id);
-        if (!empty($branch_id)) {
-            $class_rooms = ClassRooms::where('type',1)->where('organisation_id', $org_id)->where('branch_id',$branch_id)->orderBy('created_at', 'DESC')->get();
-        } else {
-            $class_rooms = ClassRooms::where('type',1)->where('organisation_id', $org_id)->orderBy('created_at', 'DESC')->get();
-        }
-        return view('assessment.add_exam',["class_rooms" => $class_rooms]);
+        //$branch_id = User::getBranchID($user_id);
+        $branches=Branch::where('organization_id',$org_id)->get();
+        return view('assessment.add_exam',["branches" => $branches]);
     }
+	public function get_classroom_by_branch_id(Request $request)
+	{
+		 $branch_id=$request->branch_id;
+		 
+         $class_rooms = ClassRooms::where('type',1)->where('branch_id',$branch_id)->orderBy('created_at', 'DESC')->get();
+        return response()->json(['class_rooms'=>$class_rooms]);
+	}
+	public function fetch_question(Request $request)
+	{
+		$q_type=$request->q_type;
+		$lesson_id=$request->lesson_id;
+		$complexity=$request->complexity;
+		if($q_type=='mcq_1')
+		$alternative_question=QuestionTypeOne::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		if($q_type=='mcq_2')
+		$alternative_question=QuestionTypeTwo::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		if($q_type=='match_following')
+		$alternative_question=QuestionTypeThree::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		if($q_type=='fill_blanks')
+		$alternative_question=QuestionTypeFour::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		if($q_type=='true_false')
+		$alternative_question=QuestionTypeFive::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		if($q_type=='short_answer')
+		$alternative_question=QuestionTypeSix::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		if($q_type=='order_sequence')
+		$alternative_question=QuestionTypeSeven::whereNotIn('id',$request->arr)->where('lesson_id',$lesson_id)->where('complexity',$complexity)->inRandomOrder()->first();
+		
+		return response()->json(['alt_question'=>$alternative_question]);
+	}
+	public function exam_questions_add(Request $request)
+	{
+		$qtypes_arr = $request->q_types_arr;
+		$exam_id=$request->exam_id;
+		$res=ExamQuestions::where('exam_id',$exam_id)->delete();
+		foreach ($qtypes_arr as $qtype)
+		{
+			if($qtype=='mcq_1')
+			{
+				$questions1=$request->q_1_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions1);
+					$exam_question->save();
+				
+				
+			}
+			if($qtype=='mcq_2')
+			{
+				$questions2=$request->q_2_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions2);
+					$exam_question->save();
+				
+				
+			}
+			if($qtype=='match_following')
+			{
+				$questions3=$request->q_3_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions3);
+					$exam_question->save();
+				
+				
+			}
+			if($qtype=='fill_blanks')
+			{
+				$questions4=$request->q_4_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions4);
+					$exam_question->save();
+				
+				
+			}
+			if($qtype=='true_false')
+			{
+				$questions5=$request->q_5_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions5);
+					$exam_question->save();
+				
+				
+			}
+			if($qtype=='short_answer')
+			{
+				$questions6=$request->q_6_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions6);
+					$exam_question->save();
+				
+			}
+		}
+		if($qtype=='order_sequence')
+			{
+				$questions7=$request->q_7_arr;
+				
+					$exam_question=new ExamQuestions();
+					$exam_question->exam_id=$exam_id;
+					$exam_question->question_type=$qtype;
+					$exam_question->question_id=implode(',',$questions7);
+					$exam_question->save();
+				
+				
+			}
+		//ExamQuestions
+		return response()->json(['status'=>true, 'message'=>'Questions added']);
+	}
+	public function exam_update(Request $request)
+	{
+		$exam_id=$request->id;
+		$exam=Exam::find($exam_id);
+		$exam->total_marks=$request->total_marks;
+		$exam->passing_mark=$request->passing_mark;
+		$exam->duration=$request->duration;
+		$exam->exam_end_date=$request->exam_end_date;
+		$exam->save();
+		return redirect()->back()->with('message', 'Exam Details Updated!');
+	}
+	public function exam_details_update(Request $request)
+	{
+		
+		$exam_id=$request->exam_id;
+		$exam_name=$request->exam_name;
+		$total_marks=$request->total_marks;
+		$passing_mark=$request->passing_mark;
+		$duration=$request->duration;
+		$exam_type=$request->exam_type;
+		
+		$exam_end_date=$request->exam_end_date;
+		$publish_on=$request->publish_on;
+		$publish_now=$request->publish_now;
+		$exam=Exam::find($exam_id);
+		$exam->exam_name=$exam_name;
+		$exam->total_marks=$total_marks;
+		$exam->passing_mark=$passing_mark;
+		$exam->duration=$duration;
+		$exam->exam_type=$exam_type;
+		
+		if(isset($request->exam_end_date))
+		$exam->exam_end_date=$request->exam_end_date;
+		$exam->publish_status=1;
+		if(isset($request->publish_on))
+			$publish_date=$request->publish_on;
+		if(isset($request->publish_now))
+			$publish_date= date('d-m-Y h:i:s a', time());
+			
+		if(isset($publish_date))
+		$exam->publish_date=$publish_date;
+		$exam->save();
+		return redirect()->back()->with('success', 'Exam Added!');
+	}
 	public function get_lessons_by_subjects_id(Request $request)
 	{
 		$subject_id=$request->subject_id;
@@ -918,11 +1099,67 @@ class AssessmentController extends Controller
 		$res=QuestionTypeTwoTemp::where('id',$id)->delete();
 		return response()->json(['status'=>true,'message'=>'Question Deleted']);
 	}  */
+	public function get_exam_by_exam_id(Request $request)
+	{
+		$id=$request->id;
+		$exam=Exam::find($id);
+		return response()->json(['exam'=>$exam]);
+	}
 	public function post_exam_one(Request $request)
 	{
-		dd($request);
+		$branch_id=$request->branch_id;
+		$class_room_id=$request->class_room_id;
+		$subject_id=$request->subject_id;
+		$lesson_ids=implode(',',$request->lesson_id);
+		$exam=new Exam();
+		$exam->branch_id=$branch_id;
+		$exam->class_room_id=$class_room_id;
+		$exam->subject_id=$subject_id;
+		$exam->lesson_ids=$lesson_ids;
+		$exam->type=1;
+		$exam->save();
+		$exam_id=$exam->id;
+		
+		$individual_lesson_id=$request->individual_lesson_id;
+		$question_type=$request->question_type;
+		$difficulty_level=$request->difficulty_level;		
+		$question_count=$request->question_count;
+		
+		for($i=0;$i<count($individual_lesson_id);$i++)
+		{
+		$exam_question_type=new ExamQuestionType();
+		$exam_question_type->exam_id=$exam_id;
+		$exam_question_type->lesson_id=$individual_lesson_id[$i];
+		$exam_question_type->question_type=$question_type[$i];
+		$exam_question_type->difficulty_level=$difficulty_level[$i];
+		$exam_question_type->no_of_questions=$question_count[$i];
+		$exam_question_type->save();
+		}
+		//dd($request);
+		return back()->with('exam_id', $exam_id);
 	}
-  
+    public function change_exam_status(Request $request)
+    {
+        $id = $request->id;
+        $exam = Exam::find($id);
+        if ($request->status == 1) {
+            $exam->type = $request->status;
+            $exam->suspend_reason = $request->suspend_msg;
+            $exam->save();
+        }
+        
+        if ($request->status == 2) {
+            
+                $exam->type = $request->status;
+                $exam->suspend_reason = $request->suspend_msg;
+                $exam->save();               
+            
+        }
+        
+        return back()->with('message', 'Status Changed Successfully!');
+        //return back()->with('message', 'Status Changed!');
+    }
+    
     public function list_question(Request $request)
     {
         $subjects = '';
