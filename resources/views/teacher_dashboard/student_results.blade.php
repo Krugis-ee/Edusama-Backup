@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <title>Admin Assessments</title>
+  <title>Teacher Assessments</title>
   <meta name="description" content="" />
   @include('dashboard.header')
   <?php
@@ -351,347 +351,143 @@
   <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
       <!-- Menu -->
-      @include('dashboard.sidebar')
+      @include('teacher_dashboard.sidebar')
       <div class="layout-page">
         <!-- Navbar -->
-        @include('dashboard.navbar')
+        @include('teacher_dashboard.navbar')
         <!-- / Navbar -->
         <!-- Content wrapper -->
         <div class="content-wrapper">
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y" id="admin_assignment">
             <div class="app-ecommerce mb-3">
-              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+              
+			  
+			<!-- Student Assessment List -->
+          <div class="container-xxl flex-grow-1 container-p-y" id="student_assessment">
+            <div class="app-ecommerce mb-3">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                 <div class="d-flex flex-column justify-content-center">
-                  <h4 id="pagetitle" class="mb-0 lists_assessments">Assessment Lists</h4>
-                  <a href="admin_assessments.html" id="back2lists">
-                    <button class="btn btn-label-secondary btn-prev waves-effect">
-                      <i class="ti ti-arrow-left me-sm-1 me-0"></i>
-                      <span class="align-middle d-sm-inline-block d-none">Back to Lists</span>
-                    </button>
-                  </a>
+                  <h4 class="mb-1 mt-3" id="pagetitle">Student Lists</h4>
                 </div>
                 <div class="d-flex align-content-center flex-wrap gap-3">
-                  <div class="d-flex gap-3">
-                    <a href="{{ route('question_bank','all_questions') }}" class="btn_design btn-primary question_bank_creation" id="logo_color" type="button">
-                      <span>
-                        <i class="ti ti-brand-python me-0 me-sm-1 ti-xs"></i>
-                        <span class="d-none d-sm-inline-block">Question Bank</span>
-                      </span>
-                    </a>
-                    <a href="{{ route('create_exam') }}" class="btn_design btn-primary question_paper_creation" id="logo_color" type="button">
-                      <span>
-                        <i class="ti ti-file-pencil me-0 me-sm-1 ti-xs"></i>
-                        <span class="d-none d-sm-inline-block">Exam Creation</span>
-                      </span>
-                    </a>
-                  </div>
+                  <button class="btn btn-label-secondary btn-prev waves-effect" id="adminassessmentlist">
+                    <i class="ti ti-arrow-left ti-xs me-sm-1 me-0"></i>
+                    <span class="align-middle d-sm-inline-block d-none">Back</span>
+                  </button>
                 </div>
               </div>
-			  <div class="card mb-4" id="filter_table">
-                <div class="card-body">
-				<form action="{{ route('assessment') }}" id="get_form" method="GET">
-                  <div class="row">
-                    <div class="col-md-4">
-                      <label class="form-label">Branch</label>
-                      <select id="assessment_branch" name="branch_id" class="form-select">
-                        <option value="">Select Branch</option>
-						<?php foreach($branches as $branch) {?>
-                        <option <?php if(isset($_GET['branch_id']) && $_GET['branch_id']==$branch->id ) { echo 'selected'; } ?> value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
-                        <?php } ?>
-                      </select>
-                    </div>
-
-                    <div class="col-md-4" id="classroom_assessment">
-                      <label class="form-label">Classroom</label>
-                      <select id="assessment_classroom" name="class_room_id" class="form-select">
-                        <option value="">Select Classroom</option>
-<?php if(isset($_GET['branch_id'])) {
-	$class_rooms=App\Models\ClassRooms::where('branch_id',$_GET['branch_id'])->get();
-	foreach($class_rooms as $class_room)
-	{
-		 if(isset($_GET['class_room_id']) && $_GET['class_room_id']==$class_room->id ) { $sel= 'selected'; } else { $sel= ''; }  
-		echo '<option '.$sel.' value="'.$class_room->id.'">'.$class_room->class_room_name.'</option>';
-	}
-}?>                        
-                      </select>
-                    </div>
-                    <!-- Group -->
-                    <div class="col-md-4" id="subject_assessment">
-                      <label class="form-label">Subject</label>
-                      <select id="assessment_subject" name="subject_id" class="form-select">
-                        <option value="">Select Subject</option> 
-<?php if(isset($_GET['branch_id'])) {
-	$subjects=App\Models\Subject::where('branch_id',$_GET['branch_id'])->get();
-	foreach($subjects as $subject)
-	{
-		if(isset($_GET['subject_id']) && $_GET['subject_id']==$subject->id ) { $sel= 'selected'; } else { $sel= ''; }  
-		echo '<option '.$sel.' value="'.$subject->id.'">'.$subject->subject_name.'</option>';
-	}
-}?>  						
-                      </select>
-                    </div>
-                  </div>
-				  </form>
+              <div class="card-header d-flex flex-wrap justify-content-between gap-3 mb-3 mt-3">
+                <div class="col-md-2">
+                  <label class="form-label"><b>Filter by Status</b></label>
+                  <select id="defaultSelect" class="form-select select_classroom">
+                    <option value="all">All</option>
+                    <option value="attended">Attended</option>
+                    <option value="not_attended">Not Attended</option>
+                  </select>
+                </div>
+                <div class="d-flex justify-content-md-end align-items-center gap-3 flex-wrap">
+                  <button type="button" class="btn btn-label-dark waves-effect" style="float:right;">Export&nbsp;<i class="icon_resize ti ti-file-arrow-right ti-sm"></i></button>
                 </div>
               </div>
-              <!-- Assessment Lists -->
-              <div class="card col-12" id="assessment_lists">
+              <div class="card col-12">
                 <div class="card-body table_admin text-nowrap">
-				@if(session()->has('message'))
-                                    <div class="alert alert-success">
-                                        {{ session()->get('message') }}
-                                    </div>
-                                    @endif
-                  <table id="example" class="display" style="width:100%">
+                  <table id="assessment_student" class="display" style="width:100%">
                     <thead>
                       <tr style="background-color: #f5c6cb30;">
-                        <th>Exam Name</th>
-                        <th>Classroom</th>
-                        <th>Subject Name</th>
-                        <th>Total Marks</th>
-                        <th>Duration</th>
-                        <th>End Date</th>
+                        <th>Student Name</th>
+                        <th>Submitted On</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Result</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
-					<?php if($exams) { 
-					foreach($exams as $exam)
-					{
+					<?php if($exam_results){ 
+					foreach($exam_results as $result){
 					?>
                       <tr>
-                        <td>
-                          <span data-bs-toggle="modal" data-bs-target="#exam_preview">
-                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;"><a href="{{ route('get_student_exam_attend',$exam->id) }}">{{ $exam->exam_name }}</a></div>
-                          </span>
-                        </td>
-                        <td><?php
-						$class_room_id=$exam->class_room_id;
-						$class_room=App\Models\ClassRooms::find($class_room_id);
-						echo $class_room_name=$class_room->class_room_name;
+                        <td><?php $student_id=$result->student_id; 
+						$student=App\Models\User::find($student_id);
+						echo $student_name=$student->first_name.' '.$student->last_name;
 						?></td>
-                        <td><?php
-						$subject_id=$exam->subject_id;
-						$subject=App\Models\Subject::find($subject_id);
-						echo $subject_name=$subject->subject_name;
-						?></td>
-                        <td><?php echo $exam->passing_mark.'/'.$exam->total_marks; ?></td>
-                        <td><?php echo $exam->duration; ?></td>
-                        <td><?php echo $exam->exam_end_date; ?></td>
+                        <td><?php $date=date_create($result->created_at); echo date_format($date,"d/m/Y");?></td>
                         <td>
-						<?php 
-						$publish_status= $exam->publish_status;
-						if($publish_status==1)
-							$publish_status_str='Published';
-						else
-							$publish_status_str='Unpublished';
-						?>
-                          <span class="badge bg-label-warning me-1" style="cursor: pointer;">
-                            <span  data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $publish_status_str }}">{{ $publish_status_str }}</span>
-                          </span>
+                          <span class="badge bg-label-success">Attended</span>
                         </td>
                         <td>
-                          <span data-bs-toggle="modal" data-bs-target="#questionlist_preview">
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Preview" class="badge badge-center bg-primary" style="cursor: pointer;">
-                              <i class="ti ti-eye"></i>
-                            </span>
-                          <div class="modal fade" id="questionlist_preview" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title mt-3" id="modalCenterTitle">
-                                         <?php echo $exam->exam_name; ?>
-                                        </h5>
-                                </div>
-                                <div class="modal-body" style="text-align:left;">
-                                  <div class="row mb-3 g-3">
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Classroom</label>
-                                      <input type="text" class="form-control" value="<?php echo $class_room_name; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Subject</label>
-                                      <input type="text" class="form-control" value="<?php echo $subject_name; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Total Marks</label>
-                                      <input type="text" class="form-control" value="<?php echo $exam->total_marks; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                                      <input type="text" class="form-control" value="<?php echo $exam->passing_mark; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="<?php echo $exam->exam_end_date; ?>" class="form-control" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label for="bs-datepicker-format" class="form-label">Duration</label>
-                                      <input type="text" value="<?php echo $exam->duration; ?>" class="form-control" readonly />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          </span>
-                          
-
-                          <span class="edit_exam" data-id="{{ $exam->id }}" data-exam-name="{{ $exam->exam_name }}" data-subject-name="{{ $subject_name }}" data-cls-name="{{ $class_room_name }}"data-bs-toggle="modal" data-bs-target="#questionlist_edit">
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit" class="badge badge-center bg-warning" style="cursor: pointer;">
-                              <i class="ti ti-edit"></i>
-                            </span>
-                          </span>
-                         
-<?php if($exam->type==1){ ?>
-                          <span>
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete"  data-id="{{ $exam->id }}" data-type="{{$exam->type}}" class="badge badge-center bg-danger toggle-class" style="cursor: pointer;">
-                              <i class="ti ti-trash"></i>
-                            </span>
-                          </span>
-<?php } ?>
-<?php if($exam->type==2){ ?>
-                          <span>
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Re Activate"  data-id="{{ $exam->id }}" data-type="{{$exam->type}}" class="badge badge-center bg-success toggle-class" style="cursor: pointer;">
-                              <i class="ti ti-trash"></i>
-                            </span>
-                          </span>
-<?php } ?>
+                          <?php
+						  $exam=App\Models\Exam::find($result->exam_id);
+						   $passing_mark=$exam->passing_mark;
+						   $total_marks=$exam->total_marks;
+					  if($result)
+					  {
+						  $attend_status=1;
+						  $score=$result->score;
+					  if($score>=$passing_mark)
+					  {
+						  echo '<span class="badge bg-success bg-glow">Passed</span>';
+						  $result_status='Passed';
+					  }
+					  else if($score<$passing_mark)
+					  {
+						  echo '<span class="badge bg-danger bg-glow">Failed</span>';
+						  $result_status='Failed';
+					  }
+					  }
+					  else 
+					  {						  
+						  $attend_status=0;
+						  $result_status='';
+						  echo ' - ';
+					  }
+						  ?>
+                        </td>
+                        <td>
+                          <span style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#scoreboard_preview_modal">
+                            <span data-bs-toggle="tooltip" data-score="{{ $score }}" data-total="{{ $total_marks }}" data-result_status="{{ $result_status }}" data-bs-placement="bottom" data-bs-original-title="Score Board" class="jp_click badge badge-center bg-info bg-glow"><i class="ti ti-scoreboard"></i></span>
+                          </span>                          
                         </td>
                       </tr>
-					  <?php } }?>
+					<?php }} ?>
+                     </tbody>
                   </table>
-				   <div class="modal fade" id="questionlist_edit" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+				  <div class="modal fade" id="scoreboard_preview_modal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-md modal-dialog-centered" role="document">
                               <div class="modal-content">
                                 <div class="modal-header">
-                                  <h5 class="modal-title mt-3 jp_exam_name" id="modalCenterTitle">
-                                        Exam Name
-                                      </h5>
-                                  <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                                  <h5 class="modal-title mt-3" id="modalCenterTitle">Score Board</h5>
                                 </div>
-								<form action="{{ route('exam_update') }}" method="post">
-								@csrf
-                                <div class="modal-body" style="text-align:left;">
+                                <div class="modal-body">
                                   <div class="row mb-3 g-3">
                                     <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Classroom</label>
-									  <input type="hidden" name="id" class="jp_exam_id">
-                                      <input type="text" readonly class="form-control jp_cls_name" value="Classroom 1" />
-                                    </div>
+                                      <label class="form-label">Mark Scored</label>
+                                      <input type="text" class="form-control" id="jp_score" value="40" readonly /> </div>
                                     <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Subject</label>
-                                      <input type="text" readonly class="form-control jp_subj_name" value="Subject 1" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Total Marks</label>
-                                      <input type="number" class="form-control" id="total_marks" name="total_marks" value="" />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                                      <input type="number" class="form-control" id="passing_mark" name="passing_mark" value="50" />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="30-05-2024" id="flatpickr-date1" name="exam_end_date" class="exam_end_date form-control" />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label for="bs-datepicker-format" class="form-label">Duration</label>
-                                      <input type="text" id="timepicker-format" value="01:00:00" name="duration" class="duration form-control" />
+                                      <label class="form-label">Total Marks</label>
+                                      <input type="text" class="form-control" id="jp_total" value="100" readonly /> </div>
+                                    <div class="col-md-12 jp_div">
+                                      <div class="alert alert-success" role="alert">Result: <b>Passed</b></div>
                                     </div>
                                   </div>
+                                  <div class="modal-footer p-0">
+                                    <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
+                                    <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                                  </div>
                                 </div>
-                                <div class="modal-footer">
-                                  <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                </div>
-								</form>
                               </div>
                             </div>
                           </div>
-
-				   <!-- Active -->
-                                        <div class="modal fade" id="org_suspend" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalCenterTitle">Activate <span class="name"></span></h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{route('change_exam_status')}}" method="POST">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col mb-3">
-                                                                    <span>Are you sure, you want to activate <b class="name">Exam</b></span>
-                                                                    <input type="hidden" id="status_active" name="status" value="1" />
-                                                                    <input type="hidden" id="id_active" name="id" />
-                                                                    <input type="hidden" id="suspend_msg" name="suspend_msg" value="" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
-                                                                No
-                                                            </button>
-                                                            <button type="submit" id="logo_color" class="btn btn-primary">Yes</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Suspend -->
-
-                                        <div class="modal fade" id="org_active" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalCenterTitle">Delete <span class="name"></h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{route('change_exam_status')}}" method="POST">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col mb-3">
-                                                                    <label for="nameWithTitle" class="form-label">Reason</label>
-                                                                    <textarea id="nameWithTitle" name="suspend_msg" required class="form-control" placeholder="Enter Reason"></textarea>
-                                                                    <input type="hidden" id="status" name="status" value="2" />
-                                                                    <input type="hidden" id="id" name="id" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
-                                                                Close
-                                                            </button>
-                                                            <button type="submit" id="logo_color" class="btn btn-primary">Delete</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                
-                            
                 </div>
               </div>
-
+            </div>
+            <!-- Content -->
+          </div>
              
 
-              <!-- Question Paper Creation -->
+              
             </div>
-            <div class="pt-4" style="float: right;">
-              <button type="button" class="btn-label-secondary waves-effect previous_button me-3" id="previous_button" style="border-color:transparent !important;background: #eaebec !important; color: #a8aaae !important;">Previous</button>
-              <button type="submit" class="btn-primary me-sm-3 me-1 waves-effect waves-light question_paper_cta" id="logo_color" style="float: right;">Next<i class="tf-icons ti ti-chevron-right ti-xs"></i></button>
-            </div>
+            
 
           </div>
         </div>
@@ -701,12 +497,12 @@
     <!-- Content wrapper -->
   </div>
   <!-- / Layout page -->
-  </div>
+  
   <!-- Overlay -->
   <div class="layout-overlay layout-menu-toggle"></div>
   <!-- Drag Target Area To SlideIn Menu On Small Screens -->
   <div class="drag-target"></div>
-  </div>
+  
   <!-- / Layout wrapper -->
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
@@ -721,8 +517,23 @@
   <script src="{{asset('assets/bootstrap-select/bootstrap-select.js')}}"></script>
 <script>
     $(function() {
+		$('.jp_click').click(function(){
+			var score = $(this).attr('data-score');
+			$('#jp_score').val(score);
+			var total = $(this).attr('data-total');
+			$('#jp_total').val(total);
+			
+			var result_status = $(this).attr('data-result_status');
+			if(result_status=='Passed')
+				$('.jp_div').html('<div class="alert alert-success" role="alert">Result: <b>Passed</b></div>');
+			if(result_status=='Failed')
+				$('.jp_div').html('<div class="alert alert-danger" role="alert">Result: <b>Failed</b></div>');
+		
+		});
       
- 
+  new DataTable('#assessment_student', {
+      scrollX: true
+    });
       $('#assessment_branch').change(function() {
 			$('#get_form').submit();      
           

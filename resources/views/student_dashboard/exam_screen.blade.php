@@ -150,8 +150,13 @@
 <body class="add_student">
    <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
+	
       <div class="container-xxl flex-grow-1 container-p-y" style="background: #dddddd59;">
-        <div class="row mb-4">
+       <form method="POST" action="{{ route('exam_screen_post') }}" id="jp_form">
+	   @csrf
+	   <input type="hidden" name="student_id" value="{{ $user_id; }}">
+	   <input type="hidden" name="exam_id" value="{{ $exam->id; }}">
+	   <div class="row mb-4">
           <div class="col-3 mb-2">
             <div class="alert alert-blue mb-0" role="alert">{{ $exam->exam_name}}</div>
           </div>
@@ -204,11 +209,12 @@
 			if($i%5==0)
 				echo '<div class="div'.$j.'" style="'.$jp_style.'"><h5>Section '.$j.'</h5>';
 			//if( $single_question['type'] == 'mcq_1')
-			echo 'No '.$j.'-'.$single_question['type'].' - '.$single_question['question_no'].'<br>';
+			//echo 'No '.$j.'-'.$single_question['type'].' - '.$single_question['question_no'].'<br>';
 			//echo $question_no= $single_question['question_no'].'<br>';
 			?>
-			<input type="hidden" name="question_type[]" value="$single_question['type']">
-			<input type="hidden" name="question_no[]" value="$single_question['question_no']">
+			<input type="hidden" name="no_of_questions" value="<?php echo $no_of_questions; ?>">
+			<input type="hidden" name="question_type[]" value="<?php echo $single_question['type']; ?>">
+			<input type="hidden" name="question_no[]" value="<?php echo $single_question['question_no']; ?>">
 			<!--Type 1 - Multiple Choice Single Answer-->
 			<?php 
 			if($single_question['type']=='mcq_1')
@@ -219,16 +225,16 @@
 			<div class="col-12 row">
                 <p><?php echo $i+1; ?>. <?php echo $single_ques->question_name; ?></p>
                 <div class="form-check mb-3" style="padding-left:8%;">
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_a; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_a; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques->option_a; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_b; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_b; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques->option_b; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_c; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)"  name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_c; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques->option_c; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_d; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques->option_d; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques->option_d; ?>. </label>
                 </div>
               </div>
@@ -244,24 +250,71 @@
 			<div class="col-12 row">
                 <p><?php echo $i+1; ?>. <?php echo $single_ques2->question_name; ?></p>
                 <div class="form-check mb-3" style="padding-left:8%;">
-                  <input class="form-check-input" type="checkbox" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_a; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="checkbox" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_a; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques2->option_a; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="checkbox" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_b; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="checkbox" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_b; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques2->option_b; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="checkbox" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_c; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="checkbox" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_c; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques2->option_c; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="checkbox" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_d; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="checkbox" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>[]" value="<?php echo $single_ques2->option_d; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques2->option_d; ?>. </label>
                 </div>
               </div>
 			<?php } } ?>
 			<!--Type 2 - Multiple Choice Multiple Answer-->
+			<!--Type 3 - Match the Following-->
+			<?php 
+			if($single_question['type']=='match_following')
+			{
+				$single_ques3=App\Models\QuestionTypeThree::find($single_question['question_no']);
+			   if($single_ques3){
+			?>
+			<div class="col-12 row">
+                <div class="row" id="match">
+                  <p><?php echo $i+1; ?>. Match the Following</p>
+                  <div class="col-lg-12 col-xl-12 col-12 mb-0">
+                    <div class="row">
+                      <div class="col-lg-6 col-xl-6 mb-0">
+                        <ol type="A" style="line-height:180%">
+                          <li><?php echo $single_ques3->option_a; ?></li>
+                          <li><?php echo $single_ques3->option_b; ?></li>
+                          <li><?php echo $single_ques3->option_c; ?></li>
+                          <li><?php echo $single_ques3->option_d; ?></li>
+                        </ol>
+                      </div>
+                      <div class="col-lg-6 col-xl-6 mb-0">
+                        <ol type="1" style="line-height:180%">
+                          <li><?php echo $single_ques3->option_1; ?></li>
+                          <li><?php echo $single_ques3->option_2; ?></li>
+                          <li><?php echo $single_ques3->option_3; ?></li>
+                          <li><?php echo $single_ques3->option_4; ?></li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-check mb-3" style="padding-left:8%;">
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques3->choice_1; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques3->choice_1; ?> </label>
+                    <br>
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques3->choice_2; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques3->choice_2; ?> </label>
+                    <br>
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques3->choice_3; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques3->choice_3; ?> </label>
+                    <br>
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques3->choice_4; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques3->choice_4; ?> </label>
+                  </div>
+                </div>
+              </div>
+			   <?php }} ?>
+			<!--Type 3 - Match the Following-->
 			<!--Type 4 - Fill in Blanks-->
 			<?php 
-			if($single_question['type']=='true_false')
+			if($single_question['type']=='fill_blanks')
 			{
 				$single_ques4=App\Models\QuestionTypeFour::find($single_question['question_no']);
 			   if($single_ques4){
@@ -269,16 +322,16 @@
 			<div class="col-12 row">
                 <p><?php echo $i+1; ?>. <?php echo $single_ques4->question_name; ?></p>
                 <div class="form-check mb-3" style="padding-left:8%;">
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_a; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_a; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques4->option_a; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_b; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_b; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques4->option_b; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_c; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_c; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques4->option_c; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_d; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques4->option_d; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques4->option_d; ?>. </label>
                 </div>
               </div>
@@ -294,16 +347,71 @@
 			<div class="col-12 row">
                 <p><?php echo $i+1; ?>. <?php echo $single_ques5->question_name; ?></p>
                 <div class="form-check mb-3" style="padding-left:8%;">
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques5->option_a; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques5->option_a; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques5->option_a; ?>. </label>
                   <br>
-                  <input class="form-check-input" type="radio" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques5->option_b; ?>" id="defaultCheck1" />
+                  <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques5->option_b; ?>" id="defaultCheck1" />
                   <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques5->option_b; ?>. </label>
                   <br>
                   </div>
               </div>
 			   <?php }} ?>
 			<!--Type 5 - True or False-->
+			<!--Type 6 - Short Questions -->
+			<?php 
+			if($single_question['type']=='short_answer')
+			{
+				$single_ques6=App\Models\QuestionTypeSix::find($single_question['question_no']);
+			if($single_ques6){
+			?>
+			<div class="col-12 row">
+                <p><?php echo $i+1; ?>.<?php echo $single_ques6->question_name; ?>?</p>
+                <div class="form-check mb-3" style="padding-left:2%;">
+                  <textarea class="form-control" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" rows="3"></textarea>
+                </div>
+              </div>
+			<?php } } ?>
+			<!--Type 6 - Short Questions -->
+			<!--Type 7 - Order Sequencing-->
+			<?php 
+			if($single_question['type']=='order_sequence')
+			{
+				$single_ques7=App\Models\QuestionTypeSeven::find($single_question['question_no']);
+			   if($single_ques7){
+			?>
+			<div class="col-12 row">
+                <div class="row" id="match">
+                  <p><?php echo $i+1; ?>. Order Sequencing</p>
+                  <div class="col-lg-12 col-xl-12 col-12 mb-0">
+				  <p><?php echo $single_ques7->question_name; ?></p>
+                    <div class="row">
+                      <div class="col-lg-6 col-xl-6 mb-0">
+                        <ol type="A" style="line-height:180%">
+                          <li><?php echo $single_ques7->option_a; ?></li>
+                          <li><?php echo $single_ques7->option_b; ?></li>
+                          <li><?php echo $single_ques7->option_c; ?></li>
+                          <li><?php echo $single_ques7->option_d; ?></li>
+                        </ol>
+                      </div>                      
+                    </div>
+                  </div>
+                  <div class="form-check mb-3" style="padding-left:8%;">
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques7->option_1; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques7->option_1; ?> </label>
+                    <br>
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques7->option_2; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques7->option_2; ?> </label>
+                    <br>
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques7->option_3; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques7->option_3; ?> </label>
+                    <br>
+                    <input class="form-check-input" type="radio" onchange="jp(<?php echo $i;?>)" name="answer_<?php echo $i; ?>" value="<?php echo $single_ques7->option_4; ?>" id="defaultCheck1" />
+                    <label class="form-check-label mb-1" for="defaultCheck1"> <?php echo $single_ques7->option_4; ?> </label>
+                  </div>
+                </div>
+              </div>
+			   <?php }} ?>
+			<!--Type 7 - Order Sequencing-->
 			<?php 
 			$i++;
 			if($i%5==0)
@@ -327,8 +435,11 @@
             <hr/>
             <small class="mb-2"><b>Choose Page number to review the answer</b></small>
             <div class="demo-inline-spacing">
-              <?php for( $i=1;$i<=$j;$i++){?>
-              <button type="button" data-no="{{ $i }}" data-tot="{{ $j }}" class="btn btn-icon btn-label-secondary waves-effect jp_sect">
+              <?php for( $i=1;$i<=$j;$i++){
+				  
+				  
+				  ?>
+              <button type="button"  id="button_<?php echo $i; ?>" data-no="{{ $i }}" data-tot="{{ $j }}" class="btn btn-icon btn-label-secondary bg-label-danger waves-effect jp_sect">
                 <?php echo $i; ?>
               </button>
 			  <?php } ?>
@@ -336,30 +447,7 @@
             <br><br><br>
           </div>
         </div>
-        <div class="row mb-4 last_review">
-          <div class="col-3 mb-2">
-          </div>
-          <div class="card col-6">
-            <h3 class="card-header" id="pagetitle" style="text-align: center;">Preview</h3>
-            <div class="card-body">
-              <div class="row mb-4">
-                <div class="col-md-1"></div>
-                <div class="col-md-5">
-                  <label class="form-label">Answered</label>
-                  <input type="text" class="form-control" value="6" readonly />
-                </div>
-                <div class="col-md-5">
-                  <label class="form-label">Not Answered</label>
-                  <input type="text" class="form-control" value="5" readonly />
-                </div>
-                <div class="col-md-1"></div>
-              </div>
-              <div class="alert alert-info" role="alert">Click <b><< Back</b> to answer 5 questions</div>
-            </div>
-          </div>
-          <div class="col-3 mb-2">
-          </div>
-        </div>
+        
         <div class="row" id="question_button">
           <div class="col-4 mb-2">
           </div>
@@ -369,9 +457,33 @@
           <div class="col-2 mb-2">
             <button type="button" class="btn-primary waves-effect waves-light" id="next" data-current_div="<?php echo 1; ?>" data-total_section="<?php echo $j; ?>" style="background-color: <?php echo $org_color; ?> !important;    border-color: <?php echo $org_color; ?> !important;">Next<span class="ti-xs ti ti-chevrons-right me-1"></span></button>
 
-            <button type="button" class="btn-success waves-effect waves-light overview_btn" id="submit_button" style="display:none; background-color: #28c76f !important;    border-color: #28c76f !important;">Submit</button>
+            <button type="button" class="btn-success waves-effect waves-light overview_btn" id="submit_button" data-tot="<?php echo $no_of_questions; ?>" style="display:none; background-color: #28c76f !important;    border-color: #28c76f !important;">Submit</button>
           </div>
           <div class="col-4 mb-2">
+          </div>
+        </div>
+		<div class="row mb-4 last_review">
+          <div class="col-3 mb-2">
+          </div>
+          <div class="card col-6">
+            <h3 class="card-header" id="pagetitle" style="text-align: center;">Preview</h3>
+            <div class="card-body">
+              <div class="row mb-4">
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                  <label class="form-label">Answered</label>
+                  <input type="text" class="form-control" id="answered" value="0" readonly />
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label">Not Answered</label>
+                  <input type="text" class="form-control" id="not_answered" value="<?php echo $no_of_questions?>" readonly />
+                </div>
+                <div class="col-md-1"></div>
+              </div>
+              <div class="alert alert-info" role="alert">Click <b><< Back</b> to answer 5 questions</div>
+            </div>
+          </div>
+          <div class="col-3 mb-2">
           </div>
         </div>
         <div class="row" id="preview_button">
@@ -381,9 +493,13 @@
             <button type="button" class="btn-label-secondary waves-effect" id="back2lists" style="float:right;"><span class="ti-xs ti ti-chevrons-left me-1"></span>Back</button>
           </div>
           <div class="col-2 mb-2">
-            <button type="button" class="btn-success waves-effect waves-light" id="exam_submit" style="background-color: #28c76f !important;    border-color: #28c76f !important;" data-bs-toggle="modal" data-bs-target="#exam_page">Submit</button>
-
-            <div class="modal fade" id="exam_page" tabindex="-1" aria-hidden="true">
+            <button type="submit" class="btn-success waves-effect waves-light" id="exam_submit" style="background-color: #28c76f !important;    border-color: #28c76f !important;" data-bs-toggle="modal" data-bs-target="#exam_page">Submit</button>
+          </div>
+          <div class="col-4 mb-2">
+          </div>
+        </div>
+		</form>
+		<div class="modal fade" id="exam_page" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                 <div class="modal-content">
                   <div class="modal-body">
@@ -393,24 +509,36 @@
                     </div>
                     <div class="modal-footer p-0">
                       <button type="button" class="btn btn-sm btn-label-danger" data-bs-dismiss="modal"> No </button>
-                      <a href="student_assessment.html">
+                      
                         <button type="button" class="btn btn-sm btn-primary exam_screen" id="logo_color">Yes</button>
-                      </a>
+                      
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col-4 mb-2">
-          </div>
-        </div>
+			
+			<div class="modal fade" id="time_out" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col">
+                        <h6>Timeout</h6> </div>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+			
       </div>
       <div class="content-backdrop fade"></div>
     </div>
     <div class="layout-overlay layout-menu-toggle"></div>
     <div class="drag-target"></div>
   </div>
+   @include('dashboard.footer')
   <script type="text/javascript">
     $(document).ready(function() {
       $('.last_review').hide();
@@ -429,7 +557,9 @@
         $('.question_review').show();
         $('#question_button').show();
       });
-
+		$('.exam_screen').click(function(){
+			$('#jp_form').submit();
+		});
     });
   </script>
 
@@ -454,11 +584,13 @@
       $('#timer').html(result);
 
       if (c == 0) {
-        $(document).find(".preButton").text("View Answer");
+		  $('#time_out').modal('show');
+		  $('#jp_form').submit();
+        /*$(document).find(".preButton").text("View Answer");
         $(document).find(".nextButton").text("Play Again?");
         quizOver = true;
-        return false;
-
+        return false;*/
+		
       }
 
       c = c - 1;
@@ -552,6 +684,41 @@
   
   $('.div'+prev).show();
   });
+  const ans=[];
+ function jp(q_no)
+ {
+	 var total_section=$('#next').attr('data-total_section');
+	 var total=$('#submit_button').attr('data-tot');
+	 if(!ans.includes(q_no))
+	 ans.push(q_no);
+	 var answered=ans.length;
+	 var notanswered=parseInt(total)-parseInt(answered);
+	 //alert(answered+'--'+notanswered);
+	 $('#answered').val(answered);
+	 $('#not_answered').val(notanswered);
+	 //each section loop
+	/*for(var i=1;i<=total_section;i++)
+	 {
+		 var num=parseInt(i)*5;
+		 for(var j=0;j<num;j++)
+		 {
+		 if(ans.includes(j))
+		 {
+			 $('#button_'+i).addClass('bg-label-success');
+			 $('#button_'+i).removeClass('bg-label-danger');
+		 }
+		 else 
+		 {
+			 $('#button_'+i).addClass('bg-label-danger');
+			 $('#button_'+i).removeClass('bg-label-success');
+		 }
+		 }
+	 }*/
+ }
+ $('#exam_submit').click(function(e){	 
+	 e.preventDefault();
+	 $('#exam_page').modal('show');
+ });
   </script>
   <!--script type="text/javascript">
     $('#next').click(function() {
