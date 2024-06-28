@@ -464,7 +464,7 @@
                       <tr>
                         <td>
                           <span data-bs-toggle="modal" data-bs-target="#exam_preview">
-                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;"><a href="{{ route('get_student_exam_attend',$exam->id) }}">{{ $exam->exam_name }}</a></div>
+                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;">{{ $exam->exam_name }}</div>
                           </span>
                         </td>
                         <td><?php

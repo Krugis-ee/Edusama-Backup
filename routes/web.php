@@ -23,10 +23,6 @@ use App\Http\Controllers\ParentDashboardController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\LessonController;
-use App\Http\Controllers\TeacherAttendanceController;
-use App\Http\Controllers\StudentAttendanceController;
-use App\Http\Controllers\ParentAttendanceController;
-use App\Http\Controllers\AdminAttendanceController;
 /*
 
 |--------------------------------------------------------------------------
@@ -295,7 +291,6 @@ Route::controller(StudentDashboardController::class)->prefix('student')->middlew
     Route::post('answer_upload_status','answer_upload_status')->name('answer_upload_status');
 	Route::get('assessment','assessment')->name('student_assessment');
 	Route::get('exam_screen/{id}','exam_screen')->name('student_exam_screen');
-	Route::post('exam_screen_post','exam_screen_post')->name('exam_screen_post');
 });
 //Teacher Dashboard
 Route::get('teacher', [TeacherDashboardController::class, 'dashboard'])->middleware('isLoggedIn')->name('teacher_dashboard');
@@ -315,9 +310,6 @@ Route::controller(TeacherDashboardController::class)->prefix('teacher')->middlew
 	Route::post('publish_teacher_assignment','publish_teacher_assignment')->name('publish_teacher_assignment');
 	Route::get('teacher_assignment_progress/{assignment_id}','teacher_assignment_progress')->name('teacher_assignment_progress');
 	Route::post('teacher_add_assignment_score','teacher_add_assignment_score')->name('teacher_add_assignment_score');
-	Route::get('assessment','assessment')->name('teacher_assessment');
-	Route::get('get_student_exam_attend/{exam_id}','get_student_exam_attend')->name('get_student_exam_attend_teacher');
-	Route::get('create_exam','create_exam')->name('create_exam_teacher');
 });
 
 Route::get('parent', [ParentDashboardController::class, 'dashboard'])->middleware('isLoggedIn')->name('parent_dashboard');
@@ -328,7 +320,6 @@ Route::controller(ParentDashboardController::class)->prefix('parent')->middlewar
     Route::get('change_password','change_password')->name('change_password_parent');
     Route::post('change_password_process','change_password_process')->name('change_password_process_parent');
     Route::get('parent_assignment/{student_id?}','parent_assignment')->name('parent_assignment');
-	Route::get('assessment','assessment')->name('parent_assessment');
 });
 //Route::get('teacher', [TeacherDashboardController::class, 'dashboard'])->middleware('isLoggedIn')->name('teacher_dashboard');
 /*Route::controller(StudentDashboardController::class)->prefix('student')->middleware('isLoggedIn')->group(function () {
@@ -353,7 +344,6 @@ Route::controller(AssessmentController::class)->prefix('admin/')->middleware('is
 	Route::post('change_exam_status', 'change_exam_status')->name('change_exam_status');
 	Route::get('get_exam_by_exam_id','get_exam_by_exam_id')->name('get_exam_by_exam_id');
 	Route::get('get_classroom_by_branch_id','get_classroom_by_branch_id')->name('get_classroom_by_branch_id');
-	Route::get('get_student_exam_attend/{exam_id}','get_student_exam_attend')->name('get_student_exam_attend');
 	
     Route::get('list_question_','list_question')->name('list_question');
     Route::post('edit_question_type_one','edit_question_type_one')->name('edit_question_type_one');
@@ -370,12 +360,6 @@ Route::controller(AssessmentController::class)->prefix('admin/')->middleware('is
 
     Route::post('edit_question_type_five','edit_question_type_five')->name('edit_question_type_five');
     Route::post('suspend_question_type_five','suspend_question_type_five')->name('suspend_question_type_five');
-
-    Route::post('edit_question_type_six','edit_question_type_six')->name('edit_question_type_six');
-    Route::post('suspend_question_type_six','suspend_question_type_six')->name('suspend_question_type_six');
-
-    Route::post('edit_question_type_seven','edit_question_type_seven')->name('edit_question_type_seven');
-    Route::post('suspend_question_type_seven','suspend_question_type_seven')->name('suspend_question_type_seven');
 });
 Route::controller(DashboardController::class)->prefix('admin/')->middleware('isLoggedIn')->group(function () {
     Route::get('my_profile','my_profile')->name('my_profile_admin');
@@ -412,25 +396,6 @@ Route::controller(DashboardController::class)->prefix('admin/user')->middleware(
     Route::get('change_password_user','change_password_user')->name('change_password_user');
     Route::post('change_password_process_user','change_password_process_user')->name('change_password_process_user');
 });
-
-Route::controller(TeacherAttendanceController::class)->prefix('teacher')->middleware('isLoggedIn')->group(function () {
-    Route::get('teacher_attendance','teacher_attendance')->name('teacher_attendance');
-    Route::get('get_subjects_by_classroom_id_teacher','get_subjects_by_classroom_id_teacher')->name('get_subjects_by_classroom_id_teacher');
-    Route::get('list_classroom','list_classroom')->name('list_classroom');
-});
-
-Route::controller(StudentAttendanceController::class)->prefix('student')->middleware('isLoggedIn')->group(function () {
-    Route::get('student_attendance','student_attendance')->name('student_attendance');
-});
-
-Route::controller(ParentAttendanceController::class)->prefix('parent')->middleware('isLoggedIn')->group(function () {
-    Route::get('parent_attendance','parent_attendance')->name('parent_attendance');
-});
-
-Route::controller(AdminAttendanceController::class)->prefix('admin')->middleware('isLoggedIn')->group(function () {
-    Route::get('admin_attendance','admin_attendance')->name('admin_attendance');
-});
-
 //super admin
 Route::get('superadmin/login',[SuperAdminController::class, 'login'])->middleware('alreadySuperadminLoggedIn')->name('superadmin_login');
 Route::post('superadmin/login_process', [SuperAdminController::class, 'login_process'])->name('super_login_process');

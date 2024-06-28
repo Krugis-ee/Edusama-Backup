@@ -294,11 +294,6 @@
 			
             <div class="card col-12">
               <div class="card-body table_admin text-nowrap">
-			  @if(session()->has('success'))
-                                <div class="alert alert-success">
-                                    {{ session()->get('success') }}
-                                </div>
-                                @endif
                 <table id="example" class="display" style="width:100%">
                   <thead>
                     <tr style="background-color: #f5c6cb30;">
@@ -327,53 +322,21 @@
                       <td>{{ $exam->exam_end_date }}</td>
                       <td><?php echo $exam->passing_mark.'/'.$exam->total_marks; ?></td>
                       <td><?php echo $exam->duration; ?></td>
-                      <td>
-					  <?php
-					  $exam_score=App\Models\ExamScores::where('exam_id',$exam->id)->where('student_id',$user_id)->first();
-					  if($exam_score)
-					  {
-					  ?>
-					  <span class="badge bg-label-success">Completed</span>
-					  <?php } else { ?>
-					  <span class="badge bg-label-warning">Not Started</span>
-					  <?php } ?>
-					  </td>
-                      <td> 
-					  <?php if($exam_score)
-							{ 
-						$stu_score=$exam_score->score;
-						$passing_mark=$exam->passing_mark;
-						if($stu_score>$passing_mark)
-							$result_status='Passed';
-						else
-							$result_status='Failed';
-						?>
-					  <span data-bs-toggle="modal" id="jp_score_board" data-result_status="{{ $result_status }}" data-score="{{ $exam_score-> score}}" data-submitted_on="{{ $exam_score->created_at }}" data-subj_name="{{ $subject_name }}" data-exam_name="{{ $exam->exam_name }}" data-bs-target="#scoreboard_preview" style="cursor:pointer;">
+                      <td><span class="badge bg-label-success">Completed</span></td>
+                      <td> <span data-bs-toggle="modal" data-bs-target="#scoreboard_preview" style="cursor:pointer;">
                           <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Score Board"  class="badge badge-center bg-info bg-glow"><i class="ti ti-scoreboard"></i></span> </span>
-						  <?php } ?>
-						  <?php if(!$exam_score)
-							{ ?>
-						  <span data-bs-toggle="modal" class="jp_exam_screen" data-id="{{ $exam->id }}" style="cursor:pointer;">
-                          <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Join Now" class="badge badge-center bg-success bg-glow" aria-describedby="tooltip923121"><i class="ti ti-pointer-plus"></i>
-                          </span> 
-                        </span>				
-							<?php } ?>
-                      </td>
-                    </tr>
-				  <?php }} ?>
-				  
                         <div class="modal fade" id="scoreboard_preview" tabindex="-1" aria-hidden="true">
                           <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
                             <div class="modal-content">
                               <div class="modal-header d-flex justify-content-between">
                                 <h5 class="modal-title" id="modalCenterTitle">
                                   Exam 1
-                                </h5> <span id="pass_status" class="badge bg-label-success"></span> </div>
+                                </h5> <span class="badge bg-label-success">Passed</span> </div>
                               <div class="modal-body" style="text-align: left;">
                                 <div class="row g-2">
                                   <div class="col mb-2">
                                     <label for="assign_score" class="form-label">Subject</label>
-                                    <input type="text" class="form-control" id="exam_subject_name" value="Subject 1" readonly/> </div>
+                                    <input type="text" class="form-control" value="Subject 1" readonly/> </div>
                                   <div class="col mb-2">
                                     <label for="received_on" class="form-label">Submitted On</label>
                                     <input type="text" class="form-control" id="received_on" placeholder="" value="12-05-2024" readonly/> </div>
@@ -381,7 +344,7 @@
                                 <div class="row g-2">
                                   <div class="col mb-2">
                                     <label for="assign_score" class="form-label">Score</label>
-                                    <input type="text" class="form-control" id="total_score" placeholder="" value="50" readonly/> </div>
+                                    <input type="text" class="form-control" id="assign_score" placeholder="" value="50" readonly/> </div>
                                 </div>
                               </div>
                               <div class="modal-footer">
@@ -390,27 +353,9 @@
                             </div>
                           </div>
                         </div>
-						
-				  
-				  <div class="modal fade" id="exam_page" tabindex="-1" aria-hidden="true">
-                          <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                              <div class="modal-body">
-                                <div class="row">
-                                  <div class="col">
-                                    <h6>Are you sure, you want to start the exam?</h6> </div>
-                                </div>
-                                <div class="modal-footer p-0">
-                                  <button type="button" class="btn btn-sm btn-label-danger" data-bs-dismiss="modal"> No </button>
-                                  <a href="#" id="jp_screen">
-                                    <button type="button" class="btn btn-sm btn-primary exam_screen" id="logo_color">Yes</button>
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-						
+                      </td>
+                    </tr>
+				  <?php }} ?>
                    </tbody>
                 </table>
               </div>
@@ -473,7 +418,11 @@
                     pagingType: 'simple_numbers'
                 });
             </script>
-            
+            <script>
+                new DataTable('#example', {
+                    pagingType: 'simple_numbers'
+                });
+            </script>
             <script>
                 // Set the date we're counting down to
                 var countDownDate = new Date("Apr 17, 2024 15:37:25").getTime();
@@ -568,39 +517,6 @@
 
 
                 });
-				$('#example tbody').on('click', '.jp_exam_screen', function () {
-				//$('.jp_exam_screen').click(function(){
-					var id= $(this).attr('data-id');
-					//alert(id);
-					var url = '{{ route("student_exam_screen", ":id") }}';
-					url = url.replace(':id', id);
-					$('#jp_screen').attr("href",url);
-					$("#exam_page").modal('show');
-				});
-				$('#example tbody').on('click', '#jp_score_board', function () {
-				//$('#jp_score_board').click(function(){
-					var exam_name=$(this).attr('data-exam_name');
-					var subj_name=$(this).attr('data-subj_name');
-					var submitted_on=$(this).attr('data-submitted_on');
-					var tot_score=$(this).attr('data-score');
-					var result_status=$(this).attr('data-result_status');
-					
-					$('#modalCenterTitle').html(exam_name);
-					$('#exam_subject_name').val(subj_name);
-					$('#received_on').val(submitted_on);
-					$('#total_score').val(tot_score);
-					if(result_status=='Passed')
-					{
-						$('#pass_status').removeClass('bg-label-danger');
-						$('#pass_status').addClass('bg-label-success');
-					}
-					if(result_status=='Failed')
-					{
-						$('#pass_status').removeClass('bg-label-success');
-						$('#pass_status').addClass('bg-label-danger');
-					}
-					$('#pass_status').html(result_status);
-				});
             </script>
 
 

@@ -13,11 +13,11 @@
                 <?php
                 if (isset($org_logo)) { ?>
                     <a href="{{route('dashboard')}}"><img src="{{ asset('assets/img/organization_logo/'.$org_logo)}}" class="main-logo" id="full_logo" width="170" height="52" alt="{{$org_name}}"></a>
-                    <!-- <a href="{{route('dashboard')}}"><img src="{{ asset('assets/img/organization_logo/'.$org_logo)}}" class="main-logo" id="half_logo" width="50" height="auto" alt="{{$org_name}}"></a></span> -->
+                    <a href="{{route('dashboard')}}"><img src="{{ asset('assets/img/organization_logo/'.$org_logo)}}" class="main-logo" id="half_logo" width="50" height="auto" alt="{{$org_name}}"></a></span>
             </span>
         <?php } else { ?>
             <a href="{{route('dashboard')}}"><img src="{{ asset('assets/img/edusama_newlogo.png')}}" class="main-logo" id="full_logo" width="170" height="52" alt="{{$org_name}}"></a>
-            <!-- <a href="{{route('dashboard')}}"><img src="{{ asset('assets/img/edusama_newlogo.png')}}" class="main-logo" id="half_logo" width="50" height="auto" alt="{{$org_name}}"></a></span> -->
+            <a href="{{route('dashboard')}}"><img src="{{ asset('assets/img/edusama_newlogo.png')}}" class="main-logo" id="half_logo" width="50" height="auto" alt="{{$org_name}}"></a></span>
         <?php } ?>
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -85,20 +85,18 @@
                 <div data-i18n="Materials">Materials</div>
             </a>
         </li>
+        <li class="menu-item">
+            <a href="" class="menu-link">
+                <i class="menu-icon icon_resize tf-icons ti ti-brand-python"></i>
+                <div data-i18n="Quizzes and Exams">Quizzes and Exams</div>
+            </a>
+        </li>
         <li class="menu-item <?php if ((Request::url() === route('teacher_assignment'))) {
                                     echo 'active';
                                 } ?>">
             <a href="{{ route('teacher_assignment') }}" class="menu-link">
                 <i class="menu-icon icon_resize tf-icons ti ti-brand-stackoverflow"></i>
                 <div data-i18n="Assignments">Assignments</div>
-            </a>
-        </li>
-		<li class="menu-item <?php if ((Request::url() === route('teacher_assessment')) ) {
-                                            echo 'active';
-                                        } ?>">
-            <a href="{{ route('teacher_assessment') }}" class="menu-link">
-                <i class="menu-icon icon_resize tf-icons ti ti-text-caption"></i>
-                <div data-i18n="Assessment"> Assessment</div>
             </a>
         </li>
         <li class="menu-item">

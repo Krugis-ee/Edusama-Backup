@@ -82,6 +82,12 @@
                 <div data-i18n="Materials"> Materials</div>
             </a>
         </li>
+        <li class="menu-item">
+            <a href="" class="menu-link">
+                <i class="menu-icon icon_resize tf-icons ti ti-brand-python"></i>
+                <div data-i18n="Quizzes and Exams"> Quizzes and Exams</div>
+            </a>
+        </li>
         <li class="menu-item <?php if ((Request::url() === route('student_assignment')) ) {
                                             echo 'active';
                                         } ?>">
