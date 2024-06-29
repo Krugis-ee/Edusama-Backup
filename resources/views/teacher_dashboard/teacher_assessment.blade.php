@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <title>Admin Assessments</title>
+  <title>Teacher Assessments</title>
   <meta name="description" content="" />
   @include('dashboard.header')
   <?php
@@ -351,10 +351,10 @@
   <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
       <!-- Menu -->
-      @include('dashboard.sidebar')
+      @include('teacher_dashboard.sidebar')
       <div class="layout-page">
         <!-- Navbar -->
-        @include('dashboard.navbar')
+        @include('teacher_dashboard.navbar')
         <!-- / Navbar -->
         <!-- Content wrapper -->
         <div class="content-wrapper">
@@ -373,13 +373,8 @@
                 </div>
                 <div class="d-flex align-content-center flex-wrap gap-3">
                   <div class="d-flex gap-3">
-                    <a href="{{ route('question_bank','all_questions') }}" class="btn_design btn-primary question_bank_creation" id="logo_color" type="button">
-                      <span>
-                        <i class="ti ti-brand-python me-0 me-sm-1 ti-xs"></i>
-                        <span class="d-none d-sm-inline-block">Question Bank</span>
-                      </span>
-                    </a>
-                    <a href="{{ route('create_exam') }}" class="btn_design btn-primary question_paper_creation" id="logo_color" type="button">
+                    
+                    <a href="{{ route('create_exam_teacher') }}" class="btn_design btn-primary question_paper_creation" id="logo_color" type="button">
                       <span>
                         <i class="ti ti-file-pencil me-0 me-sm-1 ti-xs"></i>
                         <span class="d-none d-sm-inline-block">Exam Creation</span>
@@ -390,7 +385,7 @@
               </div>
 			  <div class="card mb-4" id="filter_table">
                 <div class="card-body">
-				<form action="{{ route('assessment') }}" id="get_form" method="GET">
+				<form action="{{ route('teacher_assessment') }}" id="get_form" method="GET">
                   <div class="row">
                     <div class="col-md-4">
                       <label class="form-label">Branch</label>
@@ -464,7 +459,7 @@
                       <tr>
                         <td>
                           <span data-bs-toggle="modal" data-bs-target="#exam_preview">
-                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;"><a href="{{ route('get_student_exam_attend',$exam->id) }}">{{ $exam->exam_name }}</a></div>
+                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;"><a href="{{ route('get_student_exam_attend_teacher',$exam->id) }}">{{ $exam->exam_name }}</a></div>
                           </span>
                         </td>
                         <td><?php

@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\ClassRoomTimings;
 use App\Models\ClassRooms;
 use App\Models\User;
+use App\Models\ExamAnswers;
 use App\Models\Country;
 use App\Models\ClassRoomSubjectTeachers;
+use App\Models\Branch;
+use App\Models\Exam;
 use DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Subject;
 use App\Models\Assignment;
+use App\Models\ExamScores;
 use App\Models\AssignmentProgress;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,6 +26,18 @@ class TeacherDashboardController extends Controller
     {
         return view('teacher_dashboard.home');
     }
+	public function get_student_exam_attend($exam_id)
+	{
+		//$exam_results=ExamScores::where('exam_id',$exam_id)->get();
+		//return view('teacher_dashboard.student_results', ['exam_results'=>$exam_results]);
+        $exam=Exam::find($exam_id);
+		$class_room_id=$exam->class_room_id;
+		$subject_id=$exam->subject_id;
+		$record=ClassRoomSubjectTeachers::where('class_room_id',$class_room_id)->where('subject_id',$subject_id)->first();
+		$students_id_str=$record->students_id;
+		$students_id_arr=explode(',',$students_id_str);
+		return view('teacher_dashboard.student_results', ['exam_id'=>$exam_id,'students_arr'=>$students_id_arr]);
+	}
     public function video_course()
     {
 		$user_id = session()->get('loginId');
@@ -379,5 +395,76 @@ $timings = $timings->merge($timings8);
 			]);
 		}
 	}
-
+	public function assessment()
+    {
+		$user_id = session()->get('loginId');
+        $org_id = User::getOrganizationId($user_id);
+        $branch_id = User::getBranchID($user_id);
+        if (!empty($branch_id)) {
+			$subjects=Subject::where('type',1)->where('organization_id',1)->where('branch_id',1)->get();
+		}
+		else{
+			$subjects=Subject::where('type',1)->where('organization_id',1)->get();
+		}
+		$user_id = session()->get('loginId');
+        $org_id = User::getOrganizationId($user_id);
+        //$branch_id = User::getBranchID($user_id);
+        $branches=Branch::where('organization_id',$org_id)->get();
+		
+		$exams=[];
+		if(!empty($_GET['branch_id']))
+		$exams=Exam::where('branch_id',$_GET['branch_id'])->get();
+		
+		if( !empty($_GET['branch_id']) && !empty($_GET['class_room_id']) )
+		$exams=Exam::where('branch_id',$_GET['branch_id'])->where('class_room_id',$_GET['class_room_id'])->get();
+        
+		if( !empty($_GET['branch_id']) && !empty($_GET['class_room_id']) && !empty($_GET['subject_id']) )
+		$exams=Exam::where('branch_id',$_GET['branch_id'])->where('class_room_id',$_GET['class_room_id'])->where('subject_id',$_GET['subject_id'])->get();
+        
+		return view('teacher_dashboard.teacher_assessment',['subjects'=>$subjects,'exams'=>$exams,'branches'=>$branches]);
+    
+       
+    }
+	public function create_exam()
+    {
+		$user_id = session()->get('loginId');
+        $org_id = User::getOrganizationId($user_id);
+        //$branch_id = User::getBranchID($user_id);
+        $branches=Branch::where('organization_id',$org_id)->get();
+        return view('teacher_dashboard.add_exam',["branches" => $branches]);
+    }
+	public function get_student_single_result()
+	{		
+		$student_id=$_GET['student_id'];
+		$exam_id=$_GET['exam_id'];
+		$exam_answers=ExamAnswers::where('student_id',$student_id)->where('exam_id',$exam_id)->get();
+		return view('teacher_dashboard.student_result_single',['exam_answers'=>$exam_answers]);
+	}
+	public function score_update(Request $request)
+	{
+		$question_type_arr=$request->question_type;
+		$score_arr=$request->score;
+		$question_no_arr=$request->question_no;
+		$exam_id=$request->exam_id;
+		$student_id=$request->student_id;
+		$total=count($question_no_arr);
+		$total_score=0;
+		for($i=0;$i<$total;$i++)
+		{
+			$question_type=$question_type_arr[$i];
+			$question_no=$question_no_arr[$i];
+			$score=$score_arr[$i];
+			$exam_answer=ExamAnswers::where('student_id',$student_id)->where('exam_id',$exam_id)->where('question_type',$question_type)->where('question_no',$question_no)->first();
+			$exam_answer->score=$score;
+			$exam_answer->approved_status=1;
+			$exam_answer->save();
+			
+			$total_score+=$score;
+		}
+		$exam_score=ExamScores::where('student_id',$student_id)->where('exam_id',$exam_id)->first();
+		$exam_score->score=$total_score;
+		$exam_score->approved_status=1;
+		$exam_score->save();
+		return redirect()->back()->with('message', 'Score Updated');
+	}
 }

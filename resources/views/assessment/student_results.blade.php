@@ -25,71 +25,83 @@
       width: auto !important;
       height: auto !important;
     }
-
+    
     .admin_assignments .form-check-input:checked,
     .admin_assignments .form-check-input[type=checkbox]:indeterminate {
-      background-color: <?php echo $org_color; ?> !important;
-      border-color: <?php echo $org_color; ?> !important;
+      background-color: #e00814 !important;
+      border-color: #e00814 !important;
     }
-
+    
+    .student_exampreview .form-check-input.wrong:checked,
+    .student_exampreview .form-check-input.wrong[type=checkbox]:indeterminate {
+      background-color: red !important;
+      border-color: red !important;
+    }
+    
+    .student_exampreview .form-check-input.correct:checked,
+    .student_exampreview .form-check-input.correct[type=checkbox]:indeterminate {
+      background-color: green !important;
+      border-color: green !important;
+    }
+    
     .admin_assignments .form-check-input:focus {
-      border-color: <?php echo $org_color; ?> !important;
+      border-color: #e00814 !important;
     }
-
+    
     .admin_assignments .bg-menu-theme .menu-inner .menu-item.active > .menu-link.menu-toggle,
     .admin_assignments .layout-menu-hover.layout-menu-collapsed .bg-menu-theme .menu-inner .menu-item.active > .menu-link.menu-toggle,
     .admin_assignments .bg-menu-theme .menu-inner .menu-item.active > .menu-link.menu-toggle,
     .admin_assignments .bg-menu-theme.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle) {
-      background: linear-gradient(72.47deg, <?php echo $org_color; ?> 22.16%, <?php echo $org_color; ?> 76.47%) !important;
+      background: linear-gradient(72.47deg, #e00814 22.16%, rgb(224, 8, 20, 0.7) 76.47%) !important;
       color: #ffffff !important;
     }
-
+    
     .admin_assignments .menu-vertical .app-brand {
       margin: 20px 0.875rem 20px 1rem;
     }
-
+    
     .admin_assignments .icon_resize {
       font-size: 17px !important;
     }
-
+    
     .admin_assignments #layout-menu .icon_resize {
       margin-right: 10px;
     }
-
+    
     .layout-navbar-fixed .layout-page:before {
       background: #0000000d;
       mask: none;
     }
-
+    
     .admin_assignments #template-customizer .template-customizer-open-btn {
       display: none;
     }
-
+    
     .dropdown-item:hover,
     .dropdown-item:focus {
       background-color: #fce4e4;
       border-color: #fce4e4;
       color: inherit !important;
     }
-
+    
     .dropdown-item:not(.disabled).active,
-    .dropdown-item:not(.disabled):active {
-      background-color: <?php echo $org_color; ?>;
+    .bootstrap-select .dropdown-menu.inner a[aria-selected=true] {
+      background-color: #e00814 !important;
       color: #fff !important;
     }
-
+    
     html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner .menu-item:not(.active) > .menu-link:hover {
       background-color: #fce4e4 !important;
       border-color: #fce4e4 !important;
       color: inherit !important;
     }
-
+    
     #pagetitle,
     #modalCenterTitle,
     #exampleModalLabel5 {
-      color: <?php echo $org_color; ?>;
+      color: #e00814;
     }
-
+    
     #reportrange:focus {
       color: #6f6b7d;
       background-color: #fff !important;
@@ -97,14 +109,14 @@
       outline: 0;
       box-shadow: 0 0.125rem 0.25rem rgba(165, 163, 174, 0.3);
     }
-
+    
     #home_work:hover {
-      background: linear-gradient(72.47deg, <?php echo $org_color; ?> 22.16%, rgb(224, 8, 20, 0.7) 76.47%) !important;
+      background: linear-gradient(72.47deg, #e00814 22.16%, rgb(224, 8, 20, 0.7) 76.47%) !important;
       color: #ffffff !important;
       padding: 5px 10px;
       border-radius: 5px;
     }
-
+    
     .word_ellipsis {
       white-space: nowrap;
       width: 100px;
@@ -113,14 +125,22 @@
       text-align: center;
       padding: 5px 10px;
       border-radius: 5px;
+      margin: auto;
     }
-
+    
+    #exam_lists:hover {
+      background: linear-gradient(72.47deg, #e00814 22.16%, rgb(224, 8, 20, 0.7) 76.47%) !important;
+      color: #ffffff !important;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    
     #excel_file::before {
       content: "Upload File";
       position: absolute;
       z-index: 2;
       display: block;
-      background: linear-gradient(72.47deg, <?php echo $org_color; ?> 22.16%, rgb(224, 8, 20, 0.7) 76.47%);
+      background: linear-gradient(72.47deg, #e00814 22.16%, rgb(224, 8, 20, 0.7) 76.47%);
       width: 212px;
       /*left: 24px;
     top: 71px;*/
@@ -130,42 +150,42 @@
       color: #fff;
       border: 0px;
     }
-
+    
     input#excel_file {
       box-shadow: none;
     }
-
+    
     #excel_data th:nth-child(8),
     #excel_data td:nth-child(8) {
       color: green;
       font-weight: bold;
     }
-
+    
     .nav_div {
       text-align: center;
       padding-top: 25px;
     }
-
+    
     #nav a {
       padding: 10px 20px;
       border: 1px solid #ddd;
       color: #786868;
     }
-
+    
     #nav a.active {
       color: green;
       background: #0080002e;
       font-weight: bold;
     }
-
+    
     .nav-pills .nav-link.active,
     .nav-pills .nav-link.active:hover,
     .nav-pills .nav-link.active:focus {
-      color: <?php echo $org_color; ?>;
+      color: #ea5455;
       border-color: transparent;
       background: #fce4e4;
     }
-
+    
     .remove_button {
       border-color: transparent !important;
       background: #fad6d6 !important;
@@ -174,16 +194,17 @@
       border-radius: 8px;
       margin-top: 22px
     }
-
+    
     .table_admin select#dt-length-0,
-    .table_admin select#dt-length-1 {
+    .table_admin select#dt-length-1,
+    .table_admin select#dt-length-2 {
       margin-right: 10px !important;
     }
-
+    
     .table_admin .dt-search .dt-input {
       margin-left: 14px !important;
     }
-
+    
     .table_admin .dt-search .dt-input:focus,
     .table_admin .dt-length select.dt-input:focus {
       color: #6f6b7d;
@@ -192,7 +213,7 @@
       outline: 0;
       box-shadow: 0 0.125rem 0.25rem rgba(165, 163, 174, 0.3);
     }
-
+    
     .table_admin .dt-length select.dt-input {
       --bs-form-select-bg-img: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%236f6b7d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='white' stroke-opacity='0.2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       padding: 0.422rem 2.45rem 0.422rem 0.875rem;
@@ -210,7 +231,7 @@
       border-radius: var(--bs-border-radius);
       transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
-
+    
     table.dataTable.display tbody tr:hover > .sorting_1,
     table.dataTable.order-column.hover tbody tr:hover > .sorting_1,
     table.dataTable.display > tbody > tr:nth-child(odd) > .sorting_1,
@@ -219,11 +240,11 @@
     table.dataTable.display > tbody > tr:nth-child(odd) > * {
       box-shadow: none !important;
     }
-
+    
     .dt-layout-row {
       padding-bottom: 20px;
     }
-
+    
     .table_admin th {
       color: #5d596c !important;
       font-weight: normal !important;
@@ -232,16 +253,16 @@
       letter-spacing: 1px !important;
       text-align: center !important;
     }
-
+    
     .table_admin td {
       text-align: center !important;
     }
-
+    
     .table_admin .dt-paging-button.current {
       background: rgba(75, 70, 92, 0.08) !important;
       border: 1px solid #aaa !important;
     }
-
+    
     .table_admin .dt-paging-button.current:active {
       color: #6f6b7d !important;
       background-color: #fff !important;
@@ -249,20 +270,23 @@
       outline: 0 !important;
       box-shadow: 0 0.125rem 0.25rem rgba(165, 163, 174, 0.3) !important;
     }
-
+    
     .dt-empty {
       text-align: center !important;
     }
-
+    
     .btn_design:not([class*=btn-label-]):not([class*=btn-outline-]),
     .question_paper_cta:not([class*=btn-label-]):not([class*=btn-outline-]),
     .previous_button:not([class*=btn-label-]):not([class*=btn-outline-]) {
       box-shadow: 0 0.125rem 0.25rem rgba(165, 163, 174, 0.3);
     }
-
+    
     .btn_design,
     .question_paper_cta,
-    .previous_button {
+    .previous_button,
+    #next,
+    #prev,
+    #submit {
       display: block;
       align-items: center;
       justify-content: center;
@@ -300,50 +324,73 @@
       transition: all 0.2s ease-in-out;
       color: #fff;
     }
-
+    
     .admin_assignments #logo_color.question_bank_creation:hover,
     .admin_assignments #logo_color.question_paper_creation:hover {
-      color: <?php echo $org_color; ?> !important;
+      color: #ea5455 !important;
       background-color: #fdf1f1 !important;
-      border-color: <?php echo $org_color; ?> !important;
+      border-color: #ea5455 !important;
     }
-
+    
+    #prev {
+      color: #a8aaae !important;
+      border-color: transparent !important;
+      background: #f1f1f2 !important;
+    }
+    
     .admin_assignments #logo_color {
-      background-color: <?php echo $org_color; ?> !important;
-      border-color: <?php echo $org_color; ?> !important;
+      background-color: #e00814 !important;
+      border-color: #e00814 !important;
     }
-
+    
     #paper_lesson_div .dropdown-toggle::after {
       margin-top: 4px !important;
       float: right !important;
     }
-
+    
     .nav-tabs .nav-link:not(.active):hover,
     .nav-tabs .nav-link:not(.active):focus,
     .nav-pills .nav-link:not(.active):hover,
     .nav-pills .nav-link:not(.active):focus {
-      color: <?php echo $org_color; ?> !important;
+      color: #e00814 !important;
     }
-
+    
     #question_lists:hover {
-      background: linear-gradient(72.47deg, <?php echo $org_color; ?> 22.16%, rgb(224, 8, 20, 0.7) 76.47%) !important;
+      background: linear-gradient(72.47deg, #e00814 22.16%, rgb(224, 8, 20, 0.7) 76.47%) !important;
       color: #ffffff !important;
       padding: 5px 10px;
       border-radius: 5px;
     }
-
-    .word_ellipsis {
-      white-space: nowrap;
-      width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: center;
-      padding: 5px 10px;
-      border-radius: 5px;
-      margin: auto;
+    
+    #scroll_bar::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background-color: #F5F5F5;
+    }
+    
+    #scroll_bar::-webkit-scrollbar {
+      width: 2px;
+      background-color: #F5F5F5;
+    }
+    
+    #scroll_bar::-webkit-scrollbar-thumb {
+      background-color: #e00814;
+    }
+    
+    #div2,
+    #div3 {
+      display: none;
+    }
+    
+    #prev,
+    #submit {
+      display: none;
+      float: left;
+    }
+    
+    .clear {
+      clear: both
     }
   </style>
-
 </head>
 
 <body class="admin_assignments">
@@ -361,337 +408,158 @@
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y" id="admin_assignment">
             <div class="app-ecommerce mb-3">
-              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+              
+			  
+			<!-- Student Assessment List -->
+          <div class="container-xxl flex-grow-1 container-p-y" id="student_assessment">
+            <div class="app-ecommerce mb-3">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                 <div class="d-flex flex-column justify-content-center">
-                  <h4 id="pagetitle" class="mb-0 lists_assessments">Assessment Lists</h4>
-                  <a href="admin_assessments.html" id="back2lists">
-                    <button class="btn btn-label-secondary btn-prev waves-effect">
-                      <i class="ti ti-arrow-left me-sm-1 me-0"></i>
-                      <span class="align-middle d-sm-inline-block d-none">Back to Lists</span>
-                    </button>
-                  </a>
+                  <h4 class="mb-1 mt-3" id="pagetitle">Student Lists</h4>
                 </div>
                 <div class="d-flex align-content-center flex-wrap gap-3">
-                  <div class="d-flex gap-3">
-                    <a href="{{ route('question_bank','all_questions') }}" class="btn_design btn-primary question_bank_creation" id="logo_color" type="button">
-                      <span>
-                        <i class="ti ti-brand-python me-0 me-sm-1 ti-xs"></i>
-                        <span class="d-none d-sm-inline-block">Question Bank</span>
-                      </span>
-                    </a>
-                    <a href="{{ route('create_exam') }}" class="btn_design btn-primary question_paper_creation" id="logo_color" type="button">
-                      <span>
-                        <i class="ti ti-file-pencil me-0 me-sm-1 ti-xs"></i>
-                        <span class="d-none d-sm-inline-block">Exam Creation</span>
-                      </span>
-                    </a>
-                  </div>
+                  <button class="btn btn-label-secondary btn-prev waves-effect" id="adminassessmentlist">
+                    <i class="ti ti-arrow-left ti-xs me-sm-1 me-0"></i>
+                    <span class="align-middle d-sm-inline-block d-none">Back</span>
+                  </button>
                 </div>
               </div>
-			  <div class="card mb-4" id="filter_table">
-                <div class="card-body">
-				<form action="{{ route('assessment') }}" id="get_form" method="GET">
-                  <div class="row">
-                    <div class="col-md-4">
-                      <label class="form-label">Branch</label>
-                      <select id="assessment_branch" name="branch_id" class="form-select">
-                        <option value="">Select Branch</option>
-						<?php foreach($branches as $branch) {?>
-                        <option <?php if(isset($_GET['branch_id']) && $_GET['branch_id']==$branch->id ) { echo 'selected'; } ?> value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
-                        <?php } ?>
-                      </select>
-                    </div>
-
-                    <div class="col-md-4" id="classroom_assessment">
-                      <label class="form-label">Classroom</label>
-                      <select id="assessment_classroom" name="class_room_id" class="form-select">
-                        <option value="">Select Classroom</option>
-<?php if(isset($_GET['branch_id'])) {
-	$class_rooms=App\Models\ClassRooms::where('branch_id',$_GET['branch_id'])->get();
-	foreach($class_rooms as $class_room)
-	{
-		 if(isset($_GET['class_room_id']) && $_GET['class_room_id']==$class_room->id ) { $sel= 'selected'; } else { $sel= ''; }  
-		echo '<option '.$sel.' value="'.$class_room->id.'">'.$class_room->class_room_name.'</option>';
-	}
-}?>                        
-                      </select>
-                    </div>
-                    <!-- Group -->
-                    <div class="col-md-4" id="subject_assessment">
-                      <label class="form-label">Subject</label>
-                      <select id="assessment_subject" name="subject_id" class="form-select">
-                        <option value="">Select Subject</option> 
-<?php if(isset($_GET['branch_id'])) {
-	$subjects=App\Models\Subject::where('branch_id',$_GET['branch_id'])->get();
-	foreach($subjects as $subject)
-	{
-		if(isset($_GET['subject_id']) && $_GET['subject_id']==$subject->id ) { $sel= 'selected'; } else { $sel= ''; }  
-		echo '<option '.$sel.' value="'.$subject->id.'">'.$subject->subject_name.'</option>';
-	}
-}?>  						
-                      </select>
-                    </div>
-                  </div>
-				  </form>
+              <div class="card-header d-flex flex-wrap justify-content-between gap-3 mb-3 mt-3">
+                <div class="col-md-2">
+                  <label class="form-label"><b>Filter by Status</b></label>
+                  <select id="defaultSelect" class="form-select select_classroom">
+                    <option value="all">All</option>
+                    <option value="attended">Attended</option>
+                    <option value="not_attended">Not Attended</option>
+                  </select>
+                </div>
+                <div class="d-flex justify-content-md-end align-items-center gap-3 flex-wrap">
+                  <button type="button" class="btn btn-label-dark waves-effect" style="float:right;">Export&nbsp;<i class="icon_resize ti ti-file-arrow-right ti-sm"></i></button>
                 </div>
               </div>
-              <!-- Assessment Lists -->
-              <div class="card col-12" id="assessment_lists">
+              <div class="card col-12">
                 <div class="card-body table_admin text-nowrap">
-				@if(session()->has('message'))
-                                    <div class="alert alert-success">
-                                        {{ session()->get('message') }}
-                                    </div>
-                                    @endif
-                  <table id="example" class="display" style="width:100%">
+                  <table id="assessment_student" class="display" style="width:100%">
                     <thead>
                       <tr style="background-color: #f5c6cb30;">
-                        <th>Exam Name</th>
-                        <th>Classroom</th>
-                        <th>Subject Name</th>
-                        <th>Total Marks</th>
-                        <th>Duration</th>
-                        <th>End Date</th>
+                        <th>Student Name</th>
+                        <th>Submitted On</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Result</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
-					<?php if($exams) { 
-					foreach($exams as $exam)
-					{
+					<?php if($students_arr){ 
+					foreach($students_arr as $student_id){
+						$result=App\Models\ExamScores::where('exam_id',$exam_id)->where('student_id',$student_id)->first();
 					?>
                       <tr>
-                        <td>
-                          <span data-bs-toggle="modal" data-bs-target="#exam_preview">
-                            <div class="word_ellipsis" id="exam_lists" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $exam->exam_name }}" style="cursor:pointer;"><a href="{{ route('get_student_exam_attend',$exam->id) }}">{{ $exam->exam_name }}</a></div>
-                          </span>
-                        </td>
-                        <td><?php
-						$class_room_id=$exam->class_room_id;
-						$class_room=App\Models\ClassRooms::find($class_room_id);
-						echo $class_room_name=$class_room->class_room_name;
+                        <td><?php //$student_id=$result->student_id; 
+						$student=App\Models\User::find($student_id);
+						echo $student_name=$student->first_name.' '.$student->last_name;
 						?></td>
-                        <td><?php
-						$subject_id=$exam->subject_id;
-						$subject=App\Models\Subject::find($subject_id);
-						echo $subject_name=$subject->subject_name;
-						?></td>
-                        <td><?php echo $exam->passing_mark.'/'.$exam->total_marks; ?></td>
-                        <td><?php echo $exam->duration; ?></td>
-                        <td><?php echo $exam->exam_end_date; ?></td>
-                        <td>
-						<?php 
-						$publish_status= $exam->publish_status;
-						if($publish_status==1)
-							$publish_status_str='Published';
+                        <td><?php 
+						if($result)
+						{
+						$date=date_create($result->created_at); 
+					echo date_format($date,"d/m/Y");
+						}
 						else
-							$publish_status_str='Unpublished';
-						?>
-                          <span class="badge bg-label-warning me-1" style="cursor: pointer;">
-                            <span  data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $publish_status_str }}">{{ $publish_status_str }}</span>
-                          </span>
+						{
+							echo '-';
+						}
+						?></td>
+                        <td>
+						<?php if($result)
+						{ ?>
+                          <span class="badge bg-label-success">Attended</span>
+						<?php } else { ?>
+						<span class="badge bg-label-danger">Not Attended</span>
+						<?php } ?>
                         </td>
                         <td>
-                          <span data-bs-toggle="modal" data-bs-target="#questionlist_preview">
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Preview" class="badge badge-center bg-primary" style="cursor: pointer;">
-                              <i class="ti ti-eye"></i>
-                            </span>
-                          <div class="modal fade" id="questionlist_preview" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title mt-3" id="modalCenterTitle">
-                                         <?php echo $exam->exam_name; ?>
-                                        </h5>
-                                </div>
-                                <div class="modal-body" style="text-align:left;">
-                                  <div class="row mb-3 g-3">
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Classroom</label>
-                                      <input type="text" class="form-control" value="<?php echo $class_room_name; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Subject</label>
-                                      <input type="text" class="form-control" value="<?php echo $subject_name; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Total Marks</label>
-                                      <input type="text" class="form-control" value="<?php echo $exam->total_marks; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                                      <input type="text" class="form-control" value="<?php echo $exam->passing_mark; ?>" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="<?php echo $exam->exam_end_date; ?>" class="form-control" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label for="bs-datepicker-format" class="form-label">Duration</label>
-                                      <input type="text" value="<?php echo $exam->duration; ?>" class="form-control" readonly />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          <?php
+						  
+					  if($result)
+					  {
+						  $exam=App\Models\Exam::find($result->exam_id);
+						   $passing_mark=$exam->passing_mark;
+						   $total_marks=$exam->total_marks;
+						  $attend_status=1;
+						  $score=$result->score;
+					  if($score>=$passing_mark)
+					  {
+						  echo '<span class="badge bg-success bg-glow">Passed</span>';
+						  $result_status='Passed';
+					  }
+					  else if($score<$passing_mark)
+					  {
+						  echo '<span class="badge bg-danger bg-glow">Failed</span>';
+						  $result_status='Failed';
+					  }
+					  }
+					  else 
+					  {						  
+						  $attend_status=0;
+						  $result_status='';
+						  echo ' - ';
+					  }
+						  ?>
+                        </td>
+                        <td>
+						<?php if($result)
+					  { ?>
+                          <span style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#scoreboard_preview_modal">
+                            <span data-bs-toggle="tooltip" data-score="{{ $score }}" data-total="{{ $total_marks }}" data-result_status="{{ $result_status }}" data-bs-placement="bottom" data-bs-original-title="Score Board" class="jp_click badge badge-center bg-info bg-glow"><i class="ti ti-scoreboard"></i></span>
                           </span>
-                          
-
-                          <span class="edit_exam" data-id="{{ $exam->id }}" data-exam-name="{{ $exam->exam_name }}" data-subject-name="{{ $subject_name }}" data-cls-name="{{ $class_room_name }}"data-bs-toggle="modal" data-bs-target="#questionlist_edit">
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit" class="badge badge-center bg-warning" style="cursor: pointer;">
-                              <i class="ti ti-edit"></i>
-                            </span>
-                          </span>
-                         
-<?php if($exam->type==1){ ?>
-                          <span>
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete"  data-id="{{ $exam->id }}" data-type="{{$exam->type}}" class="badge badge-center bg-danger toggle-class" style="cursor: pointer;">
-                              <i class="ti ti-trash"></i>
-                            </span>
-                          </span>
-<?php } ?>
-<?php if($exam->type==2){ ?>
-                          <span>
-                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Re Activate"  data-id="{{ $exam->id }}" data-type="{{$exam->type}}" class="badge badge-center bg-success toggle-class" style="cursor: pointer;">
-                              <i class="ti ti-trash"></i>
-                            </span>
-                          </span>
-<?php } ?>
+							<form action="{{ route('get_student_single_result') }}" class="scoreboard_preview" style="cursor:pointer;">
+							<input type="hidden" name="student_id" value="{{ $student_id }}">
+							<input type="hidden" name="exam_id" value="{{ $exam->id }}">
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Score Board" class="jp_exam_preview badge badge-center bg-danger bg-glow"><i class="ti ti-scoreboard"></i></span>
+                          </form> 
+					  <?php } ?>						  
                         </td>
                       </tr>
-					  <?php } }?>
+					<?php }} ?>
+                     </tbody>
                   </table>
-				   <div class="modal fade" id="questionlist_edit" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+				  <div class="modal fade" id="scoreboard_preview_modal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-md modal-dialog-centered" role="document">
                               <div class="modal-content">
                                 <div class="modal-header">
-                                  <h5 class="modal-title mt-3 jp_exam_name" id="modalCenterTitle">
-                                        Exam Name
-                                      </h5>
-                                  <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                                  <h5 class="modal-title mt-3" id="modalCenterTitle">Score Board</h5>
                                 </div>
-								<form action="{{ route('exam_update') }}" method="post">
-								@csrf
-                                <div class="modal-body" style="text-align:left;">
+                                <div class="modal-body">
                                   <div class="row mb-3 g-3">
                                     <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Classroom</label>
-									  <input type="hidden" name="id" class="jp_exam_id">
-                                      <input type="text" readonly class="form-control jp_cls_name" value="Classroom 1" />
-                                    </div>
+                                      <label class="form-label">Mark Scored</label>
+                                      <input type="text" class="form-control" id="jp_score" value="40" readonly /> </div>
                                     <div class="col-md-6">
-                                      <label class="form-label" for="multicol-first-name">Subject</label>
-                                      <input type="text" readonly class="form-control jp_subj_name" value="Subject 1" readonly />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Total Marks</label>
-                                      <input type="number" class="form-control" id="total_marks" name="total_marks" value="" />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label" for="multicol-last-name">Passing Mark</label>
-                                      <input type="number" class="form-control" id="passing_mark" name="passing_mark" value="50" />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label class="form-label">Exam End Date</label>
-                                      <input type="text" value="30-05-2024" id="flatpickr-date1" name="exam_end_date" class="exam_end_date form-control" />
-                                    </div>
-                                    <div class="col-md-6">
-                                      <label for="bs-datepicker-format" class="form-label">Duration</label>
-                                      <input type="text" id="timepicker-format" value="01:00:00" name="duration" class="duration form-control" />
+                                      <label class="form-label">Total Marks</label>
+                                      <input type="text" class="form-control" id="jp_total" value="100" readonly /> </div>
+                                    <div class="col-md-12 jp_div">
+                                      <div class="alert alert-success" role="alert">Result: <b>Passed</b></div>
                                     </div>
                                   </div>
+                                  <div class="modal-footer p-0">
+                                    <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
+                                    <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                                  </div>
                                 </div>
-                                <div class="modal-footer">
-                                  <button type="submit" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" id="logo_color">Submit</button>
-                                  <button type="reset" class="btn btn-label-danger waves-effect" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                </div>
-								</form>
                               </div>
                             </div>
                           </div>
-
-				   <!-- Active -->
-                                        <div class="modal fade" id="org_suspend" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalCenterTitle">Activate <span class="name"></span></h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{route('change_exam_status')}}" method="POST">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col mb-3">
-                                                                    <span>Are you sure, you want to activate <b class="name">Exam</b></span>
-                                                                    <input type="hidden" id="status_active" name="status" value="1" />
-                                                                    <input type="hidden" id="id_active" name="id" />
-                                                                    <input type="hidden" id="suspend_msg" name="suspend_msg" value="" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
-                                                                No
-                                                            </button>
-                                                            <button type="submit" id="logo_color" class="btn btn-primary">Yes</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Suspend -->
-
-                                        <div class="modal fade" id="org_active" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalCenterTitle">Delete <span class="name"></h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{route('change_exam_status')}}" method="POST">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col mb-3">
-                                                                    <label for="nameWithTitle" class="form-label">Reason</label>
-                                                                    <textarea id="nameWithTitle" name="suspend_msg" required class="form-control" placeholder="Enter Reason"></textarea>
-                                                                    <input type="hidden" id="status" name="status" value="2" />
-                                                                    <input type="hidden" id="id" name="id" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">
-                                                                Close
-                                                            </button>
-                                                            <button type="submit" id="logo_color" class="btn btn-primary">Delete</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                
-                            
                 </div>
               </div>
-
+            </div>
+            <!-- Content -->
+          </div>
              
 
-              <!-- Question Paper Creation -->
+              
             </div>
-            <div class="pt-4" style="float: right;">
-              <button type="button" class="btn-label-secondary waves-effect previous_button me-3" id="previous_button" style="border-color:transparent !important;background: #eaebec !important; color: #a8aaae !important;">Previous</button>
-              <button type="submit" class="btn-primary me-sm-3 me-1 waves-effect waves-light question_paper_cta" id="logo_color" style="float: right;">Next<i class="tf-icons ti ti-chevron-right ti-xs"></i></button>
-            </div>
+            
 
           </div>
         </div>
@@ -701,12 +569,12 @@
     <!-- Content wrapper -->
   </div>
   <!-- / Layout page -->
-  </div>
+  
   <!-- Overlay -->
   <div class="layout-overlay layout-menu-toggle"></div>
   <!-- Drag Target Area To SlideIn Menu On Small Screens -->
   <div class="drag-target"></div>
-  </div>
+  
   <!-- / Layout wrapper -->
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
@@ -721,8 +589,27 @@
   <script src="{{asset('assets/bootstrap-select/bootstrap-select.js')}}"></script>
 <script>
     $(function() {
+		$('.jp_exam_preview').click(function(){
+			//$('.scoreboard_preview').submit();
+			  $(this).parents('form:first').submit();
+		});
+		$('.jp_click').click(function(){
+			var score = $(this).attr('data-score');
+			$('#jp_score').val(score);
+			var total = $(this).attr('data-total');
+			$('#jp_total').val(total);
+			
+			var result_status = $(this).attr('data-result_status');
+			if(result_status=='Passed')
+				$('.jp_div').html('<div class="alert alert-success" role="alert">Result: <b>Passed</b></div>');
+			if(result_status=='Failed')
+				$('.jp_div').html('<div class="alert alert-danger" role="alert">Result: <b>Failed</b></div>');
+		
+		});
       
- 
+  new DataTable('#assessment_student', {
+      scrollX: true
+    });
       $('#assessment_branch').change(function() {
 			$('#get_form').submit();      
           

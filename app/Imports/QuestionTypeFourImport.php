@@ -26,31 +26,36 @@ public function __construct($branch_id,$subject_id, $lesson_id)
 }
     public function model(array $row)
     {
-		$branch_id = $this->branch_id;
-		$subject_id = $this->subject_id;
-		$lesson_id = $this->lesson_id;
-		
-		$answer='';
-		if($row['answer']=='A')
-			$answer=$row['option_a'];
-		if($row['answer']=='B')
-			$answer=$row['option_b'];
-		if($row['answer']=='C')
-			$answer=$row['option_c'];
-		if($row['answer']=='D')
-			$answer=$row['option_d'];
-		
-        return new QuestionTypeFourTemp([
-			'branch_id'=>$branch_id,
-			'subject_id'=>$subject_id,
-			'lesson_id'=>$lesson_id,
-            'question_name'=>$row['question_name'],
-			'option_a'=>$row['option_a'],
-			'option_b'=>$row['option_b'],
-			'option_c'=>$row['option_c'],
-			'option_d'=>$row['option_d'],
-			'complexity'=>$row['complexity'],
-			'answer'=>$answer
-        ]);
+		if (!empty($row['question_type_four']) && $row['question_type_four'] == 4) {
+
+            $branch_id = $this->branch_id;
+            $subject_id = $this->subject_id;
+            $lesson_id = $this->lesson_id;
+
+            $answer = '';
+            if ($row['answer'] == 'A')
+                $answer = $row['option_a'];
+            if ($row['answer'] == 'B')
+                $answer = $row['option_b'];
+            if ($row['answer'] == 'C')
+                $answer = $row['option_c'];
+            if ($row['answer'] == 'D')
+                $answer = $row['option_d'];
+
+            return new QuestionTypeFourTemp([
+                'branch_id' => $branch_id,
+                'subject_id' => $subject_id,
+                'lesson_id' => $lesson_id,
+                'question_name' => $row['question_name'],
+                'option_a' => $row['option_a'],
+                'option_b' => $row['option_b'],
+                'option_c' => $row['option_c'],
+                'option_d' => $row['option_d'],
+                'complexity' => $row['complexity'],
+                'answer' => $answer
+            ]);
+        } else {
+            return '';
+        }
     }
 }

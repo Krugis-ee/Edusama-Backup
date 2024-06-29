@@ -173,14 +173,6 @@
                     </a>
                 </li>
             <?php } ?>
-            <?php if (in_array('quizzes_and_exams', $stie_config_arr)) { ?>
-                <li class="menu-item">
-                    <a href="" class="menu-link">
-                        <i class="menu-icon icon_resize tf-icons ti ti-brand-python"></i>
-                        <div data-i18n="Quizzes and Exams">Quizzes and Exams</div>
-                    </a>
-                </li>
-            <?php } ?>
             <?php if (in_array('assignments', $stie_config_arr)) { ?>
                 <li class="menu-item <?php if ((Request::url() === route('assignment'))) {
                                             echo 'active';

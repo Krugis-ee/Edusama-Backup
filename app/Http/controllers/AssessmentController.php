@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Exam;
 use App\Models\ExamQuestionType;
 use App\Models\ExamQuestions;
+use App\Models\ExamAnswers;
+use App\Models\ExamScores;
 use App\Models\Organization;
 use App\Models\Country;
 use App\Models\UserRole;
@@ -72,6 +74,53 @@ class AssessmentController extends Controller
         
 		return view('assessment.admin_assessment',['subjects'=>$subjects,'exams'=>$exams,'branches'=>$branches]);
     }
+	public function get_student_exam_attend($exam_id)
+	{
+		//$exam_results=ExamScores::where('exam_id',$exam_id)->get();
+		//return view('assessment.student_results', ['exam_results'=>$exam_results]);
+        $exam=Exam::find($exam_id);
+		$class_room_id=$exam->class_room_id;
+		$subject_id=$exam->subject_id;
+		$record=ClassRoomSubjectTeachers::where('class_room_id',$class_room_id)->where('subject_id',$subject_id)->first();
+		$students_id_str=$record->students_id;
+		$students_id_arr=explode(',',$students_id_str);
+		return view('assessment.student_results', ['exam_id'=>$exam_id,'students_arr'=>$students_id_arr]);
+        
+	}
+	public function get_student_single_result()
+	{		
+		$student_id=$_GET['student_id'];
+		$exam_id=$_GET['exam_id'];
+		$exam_answers=ExamAnswers::where('student_id',$student_id)->where('exam_id',$exam_id)->get();
+		return view('assessment.student_result_single',['exam_answers'=>$exam_answers]);
+	}
+	public function score_update(Request $request)
+	{
+		$question_type_arr=$request->question_type;
+		$score_arr=$request->score;
+		$question_no_arr=$request->question_no;
+		$exam_id=$request->exam_id;
+		$student_id=$request->student_id;
+		$total=count($question_no_arr);
+		$total_score=0;
+		for($i=0;$i<$total;$i++)
+		{
+			$question_type=$question_type_arr[$i];
+			$question_no=$question_no_arr[$i];
+			$score=$score_arr[$i];
+			$exam_answer=ExamAnswers::where('student_id',$student_id)->where('exam_id',$exam_id)->where('question_type',$question_type)->where('question_no',$question_no)->first();
+			$exam_answer->score=$score;
+			$exam_answer->approved_status=1;
+			$exam_answer->save();
+			
+			$total_score+=$score;
+		}
+		$exam_score=ExamScores::where('student_id',$student_id)->where('exam_id',$exam_id)->first();
+		$exam_score->score=$total_score;
+		$exam_score->approved_status=1;
+		$exam_score->save();
+		return redirect()->back()->with('message', 'Score Updated');
+	}
 	public function question_bank($slug)
 	{
 		$subjects='';
@@ -241,7 +290,8 @@ class AssessmentController extends Controller
 				$ques->subject_id=$subject_id[$i];
 				$ques->lesson_id=$lesson_id[$i];
 				$jp_ans='inlineRadioOptions_match_'.$qid[$i];
-				
+
+                $ques->question_name = $request->question_name[$i];
 				$answer='';
 				if($request->$jp_ans=='a')
 					$answer=$choice_1[$i];
@@ -472,59 +522,80 @@ class AssessmentController extends Controller
 		return redirect()->back()->withInput(['branches'=>$branches,'subjects' => $subjects,'user_role_id' => $user_role_id,'slug'=>$slug])->withInput($request->all())->with('success', $success_msg);
 	}
 	public function add_question_paper_import_post(Request $request)
-	{
-		$request->validate([
-            'branch_id' =>'required',
+    {
+        $request->validate([
+            'branch_id' => 'required',
             'subject_id' => 'required',
             'lesson_id' => 'required',
-			'filter_type'=>'required',
-			'file'=>'required|mimes:xlsx'
-            
+            'filter_type' => 'required',
+            'file' => 'required|mimes:xlsx'
+
         ]);
-		$subjects='';
+        $subjects = '';
         $user_id = session()->get('loginId');
         $org_id = User::getOrganizationId($user_id);
-		$slug=$request->slug;
-		$user_role_id = User::getUserRoleIdByUserId($user_id);
+        $slug = $request->slug;
+        $user_role_id = User::getUserRoleIdByUserId($user_id);
         //$branch_id = User::getBranchID($user_id);
-		$branch_id=$request->branch_id;
+        $branch_id = $request->branch_id;
         $user_role_id = User::getUserRoleIdByUserId($user_id);
         $branches = Branch::where('organization_id', $org_id)->where('type', 1)->get();
         if (!empty($branch_id)) {
             $subjects = Subject::where('branch_id', $branch_id)->where('type', 1)->get();
         }
-		
-		if($request->filter_type=='mcq_1')
-		{
-		Excel::import(new QuestionTypeOneImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+
+        if ($request->filter_type == 'mcq_1') {
+            try {
+                Excel::import(new QuestionTypeOneImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		if($request->filter_type=='mcq_2')
-		{
-		Excel::import(new QuestionTypeTwoImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+        if ($request->filter_type == 'mcq_2') {
+            try {
+                Excel::import(new QuestionTypeTwoImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		if($request->filter_type=='match_following')
-		{
-		Excel::import(new QuestionTypeThreeImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+        if ($request->filter_type == 'match_following') {
+            try {
+                Excel::import(new QuestionTypeThreeImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		if($request->filter_type=='fill_blanks')
-		{
-		Excel::import(new QuestionTypeFourImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+        if ($request->filter_type == 'fill_blanks') {
+            try {
+                Excel::import(new QuestionTypeFourImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		if($request->filter_type=='true_false')
-		{
-		Excel::import(new QuestionTypeFiveImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+        if ($request->filter_type == 'true_false') {
+            try {
+                Excel::import(new QuestionTypeFiveImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		if($request->filter_type=='short_answer')
-		{
-		Excel::import(new QuestionTypeSixImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+        if ($request->filter_type == 'short_answer') {
+            try {
+                Excel::import(new QuestionTypeSixImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		if($request->filter_type=='order_sequence')
-		{
-		Excel::import(new QuestionTypeSevenImport($request->branch_id,$request->subject_id,$request->lesson_id),$request->file);
+        if ($request->filter_type == 'order_sequence') {
+            try {
+                Excel::import(new QuestionTypeSevenImport($request->branch_id, $request->subject_id, $request->lesson_id), $request->file);
+            } catch (\Error $e) {
+                return back()->withError("Please check the file you uploaded!,You are trying to import wrong file or Some of the column in the file is wrong!");
+            }
         }
-		//return view('assessment.question_bank')->with('branches', $branches)->with('subjects', $subjects)->with('user_role_id', $user_role_id)->with('all_questions', $all_questions)->with('slug', $slug)->with('success','Data Imported!');
-		return redirect()->back()->withInput(['branches'=>$branches,'subjects' => $subjects,'user_role_id' => $user_role_id,'slug'=>$slug])->withInput($request->all())->with('success', 'Questions are Successfully uploaded!');
-	}
+        //return view('assessment.question_bank')->with('branches', $branches)->with('subjects', $subjects)->with('user_role_id', $user_role_id)->with('all_questions', $all_questions)->with('slug', $slug)->with('success','Data Imported!');
+        return redirect()->back()->withInput(['branches' => $branches, 'subjects' => $subjects, 'user_role_id' => $user_role_id, 'slug' => $slug])->withInput($request->all())->with('success', 'Questions are Successfully uploaded!');
+    }
 	public function clear_temp()
 	{
 		$res1=QuestionTypeOneTemp::truncate();
@@ -655,7 +726,8 @@ class AssessmentController extends Controller
 			$subject_id=$request->id_subject;
 			$lesson_id=$request->id_lesson;
 			
-			
+             $question_name = $request->question_name;
+            
 			$option_a=$request->option_a;
 			$option_b=$request->option_b;
 			$option_c=$request->option_c;
@@ -691,7 +763,8 @@ class AssessmentController extends Controller
 					$ques->answer=$choice_3[$i];
 				if($request->$jp_ans=='d')
 					$ques->answer=$choice_4[$i];				
-				
+                $ques->question_name = $request->question_name[$i];
+                
 				$ques->option_a=$option_a[$i];
 				$ques->option_b=$option_b[$i];
 				$ques->option_c=$option_c[$i];
@@ -1175,245 +1248,410 @@ class AssessmentController extends Controller
 
         if ($request->question_type == 'mcq_1') {
             if (!empty($request->branch_id)) {
-                $list_question_type_one = QuestionTypeOne::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                    return response()->json(['list_question_type_one' => $list_question_type_one,'question_type' => $request->question_type]);
-            }else{
-                $list_question_type_one = QuestionTypeOne::where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                    return response()->json(['list_question_type_one' => $list_question_type_one,'question_type' => $request->question_type]);
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_one = QuestionTypeOne::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_one = QuestionTypeOne::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } elseif (empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_one = QuestionTypeOne::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                } else {
+                    $list_question_type_one = QuestionTypeOne::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
             }
+            return response()->json(['list_question_type_one' => $list_question_type_one, 'question_type' => $request->question_type]);
         }
 
         if ($request->question_type == 'mcq_2') {
             if (!empty($request->branch_id)) {
-                $list_question_type_two = QuestionTypeTwo::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                    return response()->json(['list_question_type_two'=> $list_question_type_two,'question_type' => $request->question_type]);
-            }else{
-                $list_question_type_two = QuestionTypeTwo::where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                return response()->json(['list_question_type_two'=> $list_question_type_two,'question_type' => $request->question_type]);
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_two = QuestionTypeTwo::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_two = QuestionTypeTwo::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } elseif (empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_two = QuestionTypeTwo::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_two = QuestionTypeTwo::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
             }
+            return response()->json(['list_question_type_two' => $list_question_type_two, 'question_type' => $request->question_type]);
         }
 
         if ($request->question_type == 'match_following') {
             if (!empty($request->branch_id)) {
-                $list_question_type_Three = QuestionTypeThree::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-					return response()->json(['list_question_type_three'=> $list_question_type_Three,'question_type' => $request->question_type]);
-            }else{
-                $list_question_type_Three = QuestionTypeThree::where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                return response()->json(['list_question_type_three'=> $list_question_type_Three,'question_type' => $request->question_type]);
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_Three = QuestionTypeThree::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_Three = QuestionTypeThree::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } elseif (empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_Three = QuestionTypeThree::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_Three = QuestionTypeThree::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
             }
+            return response()->json(['list_question_type_three' => $list_question_type_Three, 'question_type' => $request->question_type]);
         }
 
         if ($request->question_type == 'fill_blanks') {
             if (!empty($request->branch_id)) {
-                $list_question_type_four = QuestionTypeFour::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-					return response()->json(['list_question_type_four'=> $list_question_type_four,'question_type' => $request->question_type]);
-            }else{
-                $list_question_type_four = QuestionTypeFour::where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                return response()->json(['list_question_type_four'=> $list_question_type_four,'question_type' => $request->question_type]);
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_four = QuestionTypeFour::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_four = QuestionTypeFour::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } elseif (empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_four = QuestionTypeFour::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_four = QuestionTypeFour::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
             }
+            return response()->json(['list_question_type_four' => $list_question_type_four, 'question_type' => $request->question_type]);
         }
 
         if ($request->question_type == 'true_false') {
             if (!empty($request->branch_id)) {
-                $list_question_type_five = QuestionTypeFive::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-					return response()->json(['list_question_type_five'=> $list_question_type_five,'question_type' => $request->question_type]);
-            }else{
-                $list_question_type_five = QuestionTypeFive::where('subject_id', $request->subject_id)
-                    ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type',1)->get();
-                return response()->json(['list_question_type_five'=> $list_question_type_five,'question_type' => $request->question_type]);
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_five = QuestionTypeFive::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_five = QuestionTypeFive::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } elseif (empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_five = QuestionTypeFive::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_five = QuestionTypeFive::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
             }
+            return response()->json(['list_question_type_five' => $list_question_type_five, 'question_type' => $request->question_type]);
         }
 
-    }
-    public function edit_question_type_one(Request $request){
-        $question = QuestionTypeOne::find($request->question_id);
-        $question->question_name=$request->question;
-        $question->option_a=$request->option_a;
-        $question->option_b=$request->option_b;
-        $question->option_c=$request->option_c;
-        $question->option_d=$request->option_d;
+        if ($request->question_type == 'short_answer') {
+            if (!empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_six = QuestionTypeSix::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_six = QuestionTypeSix::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } else {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_six = QuestionTypeSix::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_six = QuestionTypeSix::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            }
+            return response()->json(['list_question_type_six' => $list_question_type_six, 'question_type' => $request->question_type]);
+        }
 
-        if($request->inlineRadioOptions == 'a'){
+        if ($request->question_type == 'order_sequence') {
+            if (!empty($request->branch_id)) {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_seven = QuestionTypeSeven::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_seven = QuestionTypeSeven::where('branch_id', $request->branch_id)->where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            } else {
+                if (!empty($request->complexity) && $request->complexity == 'All') {
+                    $list_question_type_seven = QuestionTypeSeven::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('type', 1)->get();
+                } else {
+                    $list_question_type_seven = QuestionTypeSeven::where('subject_id', $request->subject_id)
+                        ->where('lesson_id', $request->lesson_id)->where('complexity', $request->complexity)->where('type', 1)->get();
+                }
+            }
+            return response()->json(['list_question_type_seven' => $list_question_type_seven, 'question_type' => $request->question_type]);
+        }
+    }
+    public function edit_question_type_one(Request $request)
+    {
+        $question = QuestionTypeOne::find($request->question_id);
+        $question->question_name = $request->question;
+        $question->option_a = $request->option_a;
+        $question->option_b = $request->option_b;
+        $question->option_c = $request->option_c;
+        $question->option_d = $request->option_d;
+
+        if ($request->inlineRadioOptions == 'a') {
             $question->answer = $request->option_a;
         }
-        if($request->inlineRadioOptions == 'b'){
+        if ($request->inlineRadioOptions == 'b') {
             $question->answer = $request->option_b;
         }
-        if($request->inlineRadioOptions == 'c'){
+        if ($request->inlineRadioOptions == 'c') {
             $question->answer = $request->option_c;
         }
-        if($request->inlineRadioOptions == 'd'){
+        if ($request->inlineRadioOptions == 'd') {
             $question->answer = $request->option_d;
         }
 
         $question->complexity = $request->complexity;
 
         $question->save();
-        return back()->with('success','Question updated successfully!');
+        return back()->with('success', 'Question updated successfully!');
     }
 
-    public function suspend_question_type_one(Request $request){
+    public function suspend_question_type_one(Request $request)
+    {
         $question = QuestionTypeOne::find($request->question_id);
-        if($question->type == 1){
+        if ($question->type == 1) {
             $question->type = 2;
             $question->save();
-            return back()->with('success','Question deleted successfully!');
+            return back()->with('success', 'Question deleted successfully!');
         }
     }
 
-    public function edit_question_type_two(Request $request){
+    public function edit_question_type_two(Request $request)
+    {
 
         $question = QuestionTypeTwo::find($request->question_id);
-        $question->question_name=$request->question;
-        $question->option_a=$request->option_a;
-        $question->option_b=$request->option_b;
-        $question->option_c=$request->option_c;
-        $question->option_d=$request->option_d;
+        $question->question_name = $request->question;
+        $question->option_a = $request->option_a;
+        $question->option_b = $request->option_b;
+        $question->option_c = $request->option_c;
+        $question->option_d = $request->option_d;
 
 
-        $ans_arr=[];
-				if($request->check1 == 'a')
-					array_push($ans_arr,$request->option_a);
-				if($request->check2 == 'b')
-                array_push($ans_arr,$request->option_b);
-				if($request->check3 == 'c')
-                array_push($ans_arr,$request->option_c);
-				if($request->check4 == 'd')
-                array_push($ans_arr,$request->option_d);
+        $ans_arr = [];
+        if ($request->check1 == 'a')
+            array_push($ans_arr, $request->option_a);
+        if ($request->check2 == 'b')
+            array_push($ans_arr, $request->option_b);
+        if ($request->check3 == 'c')
+            array_push($ans_arr, $request->option_c);
+        if ($request->check4 == 'd')
+            array_push($ans_arr, $request->option_d);
 
-        $question->answer=implode(',',$ans_arr);
+        $question->answer = implode(',', $ans_arr);
         $question->complexity = $request->complexity;
 
         $question->save();
-        return back()->with('success','Question updated successfully!');
+        return back()->with('success', 'Question updated successfully!');
     }
 
-    public function suspend_question_type_two(Request $request){
+    public function suspend_question_type_two(Request $request)
+    {
         $question = QuestionTypeTwo::find($request->question_id);
-        if($question->type == 1){
+        if ($question->type == 1) {
             $question->type = 2;
             $question->save();
-            return back()->with('success','Question deleted successfully!');
+            return back()->with('success', 'Question deleted successfully!');
         }
     }
 
-    public function edit_question_type_three(Request $request){
+    public function edit_question_type_three(Request $request)
+    {
         $question = QuestionTypeThree::find($request->question_id);
 
-        $question->option_a=$request->option_a;
-        $question->option_b=$request->option_b;
-        $question->option_c=$request->option_c;
-        $question->option_d=$request->option_d;
+        $question->question_name = $request->question_name;
 
-        $question->option_1=$request->option_1;
-        $question->option_2=$request->option_2;
-        $question->option_3=$request->option_3;
-        $question->option_4=$request->option_4;
+        $question->option_a = $request->option_a;
+        $question->option_b = $request->option_b;
+        $question->option_c = $request->option_c;
+        $question->option_d = $request->option_d;
 
-        $question->choice_1=$request->choice_1;
-        $question->choice_2=$request->choice_2;
-        $question->choice_3=$request->choice_3;
-        $question->choice_4=$request->choice_4;
+        $question->option_1 = $request->option_1;
+        $question->option_2 = $request->option_2;
+        $question->option_3 = $request->option_3;
+        $question->option_4 = $request->option_4;
 
-        if($request->inlineRadioOptions == 'a'){
+        $question->choice_1 = $request->choice_1;
+        $question->choice_2 = $request->choice_2;
+        $question->choice_3 = $request->choice_3;
+        $question->choice_4 = $request->choice_4;
+
+        if ($request->inlineRadioOptions == 'a') {
             $question->answer = $request->choice_1;
         }
-        if($request->inlineRadioOptions == 'b'){
+        if ($request->inlineRadioOptions == 'b') {
             $question->answer = $request->choice_2;
         }
-        if($request->inlineRadioOptions == 'c'){
+        if ($request->inlineRadioOptions == 'c') {
             $question->answer = $request->choice_3;
         }
-        if($request->inlineRadioOptions == 'd'){
+        if ($request->inlineRadioOptions == 'd') {
             $question->answer = $request->choice_4;
         }
 
         $question->complexity = $request->complexity;
 
         $question->save();
-        return back()->with('success','Question updated successfully!');
+        return back()->with('success', 'Question updated successfully!');
     }
 
-    public function suspend_question_type_three(Request $request){
+    public function suspend_question_type_three(Request $request)
+    {
         $question = QuestionTypeThree::find($request->question_id);
-        if($question->type == 1){
+        if ($question->type == 1) {
             $question->type = 2;
             $question->save();
-            return back()->with('success','Question deleted successfully!');
+            return back()->with('success', 'Question deleted successfully!');
         }
     }
 
-    public function edit_question_type_four(Request $request){
+    public function edit_question_type_four(Request $request)
+    {
         $question = QuestionTypeFour::find($request->question_id);
-        $question->question_name=$request->question;
-        $question->option_a=$request->option_a;
-        $question->option_b=$request->option_b;
-        $question->option_c=$request->option_c;
-        $question->option_d=$request->option_d;
+        $question->question_name = $request->question;
+        $question->option_a = $request->option_a;
+        $question->option_b = $request->option_b;
+        $question->option_c = $request->option_c;
+        $question->option_d = $request->option_d;
 
-        if($request->inlineRadioOptions == 'a'){
+        if ($request->inlineRadioOptions == 'a') {
             $question->answer = $request->option_a;
         }
-        if($request->inlineRadioOptions == 'b'){
+        if ($request->inlineRadioOptions == 'b') {
             $question->answer = $request->option_b;
         }
-        if($request->inlineRadioOptions == 'c'){
+        if ($request->inlineRadioOptions == 'c') {
             $question->answer = $request->option_c;
         }
-        if($request->inlineRadioOptions == 'd'){
+        if ($request->inlineRadioOptions == 'd') {
             $question->answer = $request->option_d;
         }
 
         $question->complexity = $request->complexity;
 
         $question->save();
-        return back()->with('success','Question updated successfully!');
+        return back()->with('success', 'Question updated successfully!');
     }
 
-    public function suspend_question_type_four(Request $request){
+    public function suspend_question_type_four(Request $request)
+    {
         $question = QuestionTypeFour::find($request->question_id);
-        if($question->type == 1){
+        if ($question->type == 1) {
             $question->type = 2;
             $question->save();
-            return back()->with('success','Question deleted successfully!');
+            return back()->with('success', 'Question deleted successfully!');
         }
     }
 
-    public function edit_question_type_five(Request $request){
+    public function edit_question_type_five(Request $request)
+    {
         $question = QuestionTypeFive::find($request->question_id);
 
-        $question->question_name=$request->question;
-        $question->option_a=$request->option_a;
-        $question->option_b=$request->option_b;
+        $question->question_name = $request->question;
+        $question->option_a = $request->option_a;
+        $question->option_b = $request->option_b;
 
-        if($request->inlineRadioOptions == 'a'){
+        if ($request->inlineRadioOptions == 'a') {
             $question->answer = $request->option_a;
         }
-        if($request->inlineRadioOptions == 'b'){
+        if ($request->inlineRadioOptions == 'b') {
             $question->answer = $request->option_b;
         }
 
         $question->complexity = $request->complexity;
 
         $question->save();
-        return back()->with('success','Question updated successfully!');
+        return back()->with('success', 'Question updated successfully!');
     }
 
-    public function suspend_question_type_five(Request $request){
+    public function suspend_question_type_five(Request $request)
+    {
         $question = QuestionTypeFive::find($request->question_id);
-        if($question->type == 1){
+        if ($question->type == 1) {
             $question->type = 2;
             $question->save();
-            return back()->with('success','Question deleted successfully!');
+            return back()->with('success', 'Question deleted successfully!');
+        }
+    }
+
+    public function edit_question_type_six(Request $request)
+    {
+        $question = QuestionTypeSix::find($request->question_id);
+
+        $question->question_name = $request->question;
+        $question->answer = $request->answer;
+
+        $question->complexity = $request->complexity;
+
+        $question->save();
+        return back()->with('success', 'Question updated successfully!');
+    }
+
+    public function suspend_question_type_six(Request $request)
+    {
+        $question = QuestionTypeSix::find($request->question_id);
+        if ($question->type == 1) {
+            $question->type = 2;
+            $question->save();
+            return back()->with('success', 'Question deleted successfully!');
+        }
+    }
+
+    public function edit_question_type_seven(Request $request)
+    {
+        $question = QuestionTypeSeven::find($request->question_id);
+
+        $question->question_name = $request->question;
+
+        $question->option_a = $request->option_a;
+        $question->option_b = $request->option_b;
+        $question->option_c = $request->option_c;
+        $question->option_d = $request->option_d;
+
+        $question->option_1 = $request->option_1;
+        $question->option_2 = $request->option_2;
+        $question->option_3 = $request->option_3;
+        $question->option_4 = $request->option_4;
+
+        if ($request->inlineRadioOptions == 'a') {
+            $question->answer = $request->option_1;
+        }
+        if ($request->inlineRadioOptions == 'b') {
+            $question->answer = $request->option_2;
+        }
+        if ($request->inlineRadioOptions == 'c') {
+            $question->answer = $request->option_3;
+        }
+        if ($request->inlineRadioOptions == 'd') {
+            $question->answer = $request->option_4;
+        }
+
+        $question->complexity = $request->complexity;
+
+        $question->save();
+        return back()->with('success', 'Question updated successfully!');
+    }
+    public function suspend_question_type_seven(Request $request)
+    {
+        $question = QuestionTypeSeven::find($request->question_id);
+        if ($question->type == 1) {
+            $question->type = 2;
+            $question->save();
+            return back()->with('success', 'Question deleted successfully!');
         }
     }
 }

@@ -26,17 +26,21 @@ public function __construct($branch_id,$subject_id, $lesson_id)
 }
     public function model(array $row)
     {
-		$branch_id = $this->branch_id;
-		$subject_id = $this->subject_id;
-		$lesson_id = $this->lesson_id;
-		
-		return new QuestionTypeSixTemp([
-			'branch_id'=>$branch_id,
-			'subject_id'=>$subject_id,
-			'lesson_id'=>$lesson_id,
-            'question_name'=>$row['question_name'],
-			'complexity'=>$row['complexity'],
-			'answer'=>$row['answer']
-        ]);
+		if (!empty($row['question_type_six']) && $row['question_type_six'] == 6) {
+            $branch_id = $this->branch_id;
+            $subject_id = $this->subject_id;
+            $lesson_id = $this->lesson_id;
+
+            return new QuestionTypeSixTemp([
+                'branch_id' => $branch_id,
+                'subject_id' => $subject_id,
+                'lesson_id' => $lesson_id,
+                'question_name' => $row['question_name'],
+                'complexity' => $row['complexity'],
+                'answer' => $row['answer']
+            ]);
+        } else {
+            return '';
+        }
     }
 }

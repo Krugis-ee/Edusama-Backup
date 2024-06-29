@@ -7,6 +7,15 @@ use App\Models\ClassRoomTimings;
 use App\Models\ClassRooms;
 use App\Models\User;
 use App\Models\Exam;
+use App\Models\ExamAnswers;
+use App\Models\ExamScores;
+use App\Models\QuestionTypeOne;
+use App\Models\QuestionTypeTwo;
+use App\Models\QuestionTypeThree;
+use App\Models\QuestionTypeFour;
+use App\Models\QuestionTypeFive;
+use App\Models\QuestionTypeSix;
+use App\Models\QuestionTypeSeven;
 use App\Models\Country;
 use App\Models\Assignment;
 use App\Models\AssignmentProgress;
@@ -40,6 +49,125 @@ class StudentDashboardController extends Controller
 	{
 		$exam=Exam::find($id);
 		return view('student_dashboard.exam_screen',['exam'=>$exam]);
+	}
+	public function exam_screen_post(Request $request)
+	{
+		//dd($request);		
+		$no_of_questions=$request->no_of_questions;
+		$question_type=$request->question_type;
+		$question_no=$request->question_no;
+		$exam_id=$request->exam_id;
+		$single_exam=Exam::find($exam_id);
+		$total_marks=$single_exam->total_marks;
+		$total_score=0;
+		$score_sing=0;
+		$single_question_score=$total_marks/$no_of_questions;
+		for($i=0;$i<$no_of_questions;$i++)
+		{
+			$score_sing=0;
+			$answer_val='answer_'.$i;
+			$answer_given=$request->$answer_val;
+			$answer=new ExamAnswers;
+			$answer->student_id=$request->student_id;
+			$answer->exam_id=$request->exam_id;
+			$answer->question_type=$question_type[$i];
+			$answer->question_no=$question_no[$i];
+			if(is_array($answer_given))
+				$answer_value=implode(',',$answer_given);
+			else
+				$answer_value=$answer_given;
+			$answer->answer=$answer_value;
+			
+			//score				
+			if($question_type[$i]=='mcq_1')
+			{
+				$single_ques1=QuestionTypeOne::find($question_no[$i]);
+					if($single_ques1->answer==$answer_value)
+					{
+						
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+					}
+			}
+			if($question_type[$i]=='mcq_2')
+			{
+				$single_ques2=QuestionTypeTwo::find($question_no[$i]);
+				$right_ans_arr=explode(',',$single_ques2->answer);
+				//$student_ans_arr=explode(',',$answer_value);
+				$student_ans_arr=$answer_given;
+				$result_jp_arr=[];
+				if(is_array($student_ans_arr))
+				$result_jp_arr=array_intersect($right_ans_arr,$student_ans_arr);
+				
+				if(count($right_ans_arr)==count($result_jp_arr))
+				{
+						
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+				}
+				
+				
+			}
+			if($question_type[$i]=='match_following')
+			{
+					$single_ques3=QuestionTypeThree::find($question_no[$i]);
+					if($single_ques3->answer==$answer_value)
+					{
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+					}
+			}
+			if($question_type[$i]=='fill_blanks')
+			{
+				$single_ques4=QuestionTypeFour::find($question_no[$i]);
+					if($single_ques4->answer==$answer_value)
+					{
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+					}
+			}				
+			if($question_type[$i]=='true_false')
+			{
+				$single_ques5=QuestionTypeFive::find($question_no[$i]);
+					if($single_ques5->answer==$answer_value)
+					{
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+					}
+			}				
+			if($question_type[$i]=='short_answer')
+			{
+				$single_ques6=QuestionTypeSix::find($question_no[$i]);
+					if($single_ques6->answer==$answer_value)
+					{
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+					}
+			}
+			if($question_type[$i]=='order_sequence')
+			{
+				$single_ques7=QuestionTypeSeven::find($question_no[$i]);
+					if($single_ques7->answer==$answer_value)
+					{
+					$score_sing=$single_question_score;
+					$total_score+=$single_question_score;
+					}
+			}				
+			//score	
+			if($score_sing>0)
+				$answer->score=$score_sing;
+			else
+				$answer->score=0;
+			$answer->save();
+			//echo $score_sing.'<br>';
+			
+		}
+		$exam_score=new ExamScores;
+		$exam_score->student_id =$request->student_id;
+		$exam_score->exam_id = $request->exam_id;
+		$exam_score->score =$total_score;
+		$exam_score->save();
+		return redirect(route('student_assessment'))->with('success', 'Exam Submitted successfully!');
 	}
     public function online_class()
     {

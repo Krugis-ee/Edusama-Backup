@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Country;
 use App\Models\Assignment;
 use App\Models\AssignmentProgress;
+use App\Models\Exam;
 use App\Models\ClassRoomSubjectTeachers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -129,4 +130,21 @@ class ParentDashboardController extends Controller
         }
         return view('parent_dashboard.parent_assignment', ['assignments' => $assignments, 'students' => $students,'student_count' => $student_count,'student_id' => $student_id]);
     }
+	public function assessment()
+	{
+		 $parent_id = session()->get('loginId');
+         //$student_count = User::where('user_role_id', 2)->where('parent_id', $parent_id)->count();
+         $students = User::where('user_role_id', 2)->where('parent_id', $parent_id)->get();
+        $exams=[];
+		if(isset($_GET['student_id'])){
+            $student_id = $_GET['student_id'];
+			$subjects = ClassRoomSubjectTeachers::whereRaw("find_in_set('" . $student_id . "',students_id)")->get();
+            foreach ($subjects as $subject) {
+                //$subject_id[] = $subject->subject_id;
+                $class_room_id[] = $subject->class_room_id;
+            }
+			$exams=Exam::whereIn('class_room_id',$class_room_id)->get();
+        }
+		return view('parent_dashboard.assessment', ['students' => $students,'exams'=>$exams]);
+	}
 }

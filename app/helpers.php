@@ -12,4 +12,4 @@ function daycount($day, $startdate,$enddate, $counter)
         return daycount($day, strtotime("next ".$day, $startdate),$enddate, ++$counter);
     }
 }
-}				?>
+}       ?>
